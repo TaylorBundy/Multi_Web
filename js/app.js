@@ -221,24 +221,78 @@ function mostrarDescarga(url, nombre) {
   //const boton = document.getElementById("btnDescargar");
 
   boton.addEventListener("click", async () => {
-    const urlInput = document.getElementById("videoUrl").value;
+    // Reemplazá por tus variables reales de logo y color si las tenés
+    //const logo = "tu-logo.png";
+    const backgroundColor = "#f0f0f0";
+    //const urlInput = document.getElementById("videoUrl").value; // Tu input de origen
 
-    if (!urlInput) {
+    if (!url) {
       alert("Por favor, ingresa una URL válida.");
       return;
     }
 
-    boton.innerText = "Descargando en el servidor...";
+    boton.innerText = "Procesando...";
     boton.disabled = true;
 
+    // ==========================================
+    // 1. CREACIÓN DEL MODAL (Tu diseño original)
+    // ==========================================
+    const modal = document.createElement("div");
+    modal.style.cssText = `position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 999999; font-family: Arial, sans-serif;`;
+
+    const contenido = document.createElement("div");
+    contenido.style.cssText = `background: white; padding: 20px; border-radius: 12px; width: 370px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,.3); color: black;`;
+
+    const imagenContainer = document.createElement("div");
+    imagenContainer.style.cssText = `position: relative; display: flex; justify-content: center; background-color: ${backgroundColor}; border-radius: 12px; padding: 5px;`;
+
+    const imagen = document.createElement("img");
+    imagen.src = logo;
+    imagenContainer.appendChild(imagen);
+
+    const titulo = document.createElement("div");
+    titulo.style.cssText = `font-size: 16px; font-weight: bold; margin-bottom: 15px; word-break: break-word;`;
+    titulo.textContent = `📥 Procesando video...`;
+
+    const porcentajeTexto = document.createElement("div");
+    porcentajeTexto.style.cssText = `font-size: 20px; margin-bottom: 10px;`;
+    porcentajeTexto.textContent = "Conectando...";
+
+    const barra = document.createElement("div");
+    barra.style.cssText = `width: 100%; height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 10px;`;
+
+    const progreso = document.createElement("div");
+    progreso.style.cssText = `width: 0%; height: 100%; background: #4caf50; transition: width .2s;`;
+    barra.appendChild(progreso);
+
+    const detalle = document.createElement("div");
+    detalle.style.cssText = `font-size: 12px; color: #666; margin-top: 8px;`;
+
+    const velocidadTexto = document.createElement("div");
+    velocidadTexto.style.cssText = `font-size: 12px; color: #666; margin-top: 4px;`;
+    velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+    contenido.append(
+      imagenContainer,
+      titulo,
+      porcentajeTexto,
+      barra,
+      detalle,
+      velocidadTexto,
+    );
+    modal.appendChild(contenido);
+    document.body.appendChild(modal);
+
     try {
+      // ==========================================
+      // 2. PETICIÓN POST AL SERVIDOR PYTHON
+      // ==========================================
       const respuesta = await fetch(`${API}/descargar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: urlInput }),
+        body: JSON.stringify({ url: url }),
       });
 
-      // Validar si el backend devolvió un error (que vendría en formato JSON)
       if (!respuesta.ok) {
         const errorDatos = await respuesta.json();
         throw new Error(
@@ -246,22 +300,91 @@ function mostrarDescarga(url, nombre) {
         );
       }
 
-      // LEER LA RESPUESTA COMO ARCHIVO BINARIO (BLOB)
-      const blobVideo = await respuesta.blob();
-
-      // Obtener el nombre del archivo enviado desde los encabezados del servidor (u otorgar uno por defecto)
+      // Obtener nombre del archivo desde las cabeceras
       const contentDisposition = respuesta.headers.get("Content-Disposition");
-      let nombreArchivo = "video_descargado.mp4";
+      let nombreArchivo = `${nombre}`; // Valor por defecto
       if (contentDisposition && contentDisposition.includes("filename=")) {
         nombreArchivo = contentDisposition
           .split("filename=")[1]
           .replace(/['"]/g, "");
       }
 
-      // Crear una URL local en el navegador del usuario apuntando al objeto binario
-      const urlBlobLocal = window.URL.createObjectURL(blobVideo);
+      // Actualizar título del modal con el nombre real obtenido
+      titulo.textContent = `📥 Descargando: ${nombreArchivo}`;
 
-      // Crear elemento de descarga oculto e iniciarla de inmediato
+      // ==========================================
+      // 3. PROCESAMIENTO DEL FLUJO BINARIO (STREAM)
+      // ==========================================
+      const total = Number(respuesta.headers.get("content-length"));
+      if (!total) {
+        porcentajeTexto.textContent = "Descargando...";
+        detalle.textContent = "No se puede calcular el progreso total.";
+      }
+
+      const reader = respuesta.body.getReader();
+      const chunks = [];
+      let descargado = 0;
+
+      let ultimoTiempo = performance.now();
+      let ultimoDescargado = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        chunks.push(value);
+        descargado += value.length;
+
+        const ahora = performance.now();
+        const tiempo = (ahora - ultimoTiempo) / 1000;
+
+        if (tiempo >= 0.5) {
+          const bytesIntervalo = descargado - ultimoDescargado;
+          const velocidad = bytesIntervalo / tiempo;
+          let textoVelocidad;
+
+          if (velocidad >= 1024 * 1024) {
+            textoVelocidad = `${(velocidad / 1024 / 1024).toFixed(2)} MB/s`;
+          } else if (velocidad >= 1024) {
+            textoVelocidad = `${(velocidad / 1024).toFixed(2)} KB/s`;
+          } else {
+            textoVelocidad = `${velocidad.toFixed(0)} B/s`;
+          }
+
+          velocidadTexto.textContent = `Velocidad: ${textoVelocidad}`;
+          ultimoTiempo = ahora;
+          ultimoDescargado = descargado;
+
+          if (total && velocidad > 0) {
+            const restante = total - descargado;
+            const segundos = restante / velocidad;
+            let eta;
+
+            if (segundos >= 3600) {
+              eta = `${Math.floor(segundos / 3600)}h ${Math.floor((segundos % 3600) / 60)}m`;
+            } else if (segundos >= 60) {
+              eta = `${Math.floor(segundos / 60)}m ${Math.floor(segundos % 60)}s`;
+            } else {
+              eta = `${Math.ceil(segundos)} s`;
+            }
+
+            detalle.textContent = `${(descargado / 1024 / 1024).toFixed(2)} MB / ${(total / 1024 / 1024).toFixed(2)} MB • ETA: ${eta}`;
+          }
+        }
+
+        if (total) {
+          const porcentaje = ((descargado / total) * 100).toFixed(1);
+          porcentajeTexto.textContent = `${porcentaje}%`;
+          progreso.style.width = `${porcentaje}%`;
+        }
+      }
+
+      // ==========================================
+      // 4. DESCARGA FINAL AUTOMÁTICA EN CLIENTE
+      // ==========================================
+      const blob = new Blob(chunks);
+      const urlBlobLocal = window.URL.createObjectURL(blob);
+
       const enlaceTemporal = document.createElement("a");
       enlaceTemporal.href = urlBlobLocal;
       enlaceTemporal.setAttribute("download", nombreArchivo);
@@ -269,17 +392,87 @@ function mostrarDescarga(url, nombre) {
       document.body.appendChild(enlaceTemporal);
       enlaceTemporal.click();
 
-      // Limpieza de memoria
+      // Limpieza
       document.body.removeChild(enlaceTemporal);
       window.URL.revokeObjectURL(urlBlobLocal);
+
+      // Feedback de éxito
+      porcentajeTexto.textContent = "100%";
+      progreso.style.width = "100%";
+      detalle.textContent = "Descarga completada";
+      velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+      setTimeout(() => modal.remove(), 1200);
     } catch (error) {
       console.error("Error:", error);
       alert("Error: " + error.message);
+      modal.remove(); // Remueve el modal si falla el proceso
     } finally {
       boton.innerText = "Descargar";
       boton.disabled = false;
     }
   });
+
+  // boton.addEventListener("click", async () => {
+  //   //const urlInput = document.getElementById("videoUrl").value;
+
+  //   if (!url) {
+  //     alert("Por favor, ingresa una URL válida.");
+  //     return;
+  //   }
+
+  //   boton.innerText = "Descargando en el servidor...";
+  //   boton.disabled = true;
+
+  //   try {
+  //     const respuesta = await fetch(`${API}/descargar`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ url: url }),
+  //     });
+
+  //     // Validar si el backend devolvió un error (que vendría en formato JSON)
+  //     if (!respuesta.ok) {
+  //       const errorDatos = await respuesta.json();
+  //       throw new Error(
+  //         errorDatos.error || "Error desconocido en el servidor.",
+  //       );
+  //     }
+
+  //     // LEER LA RESPUESTA COMO ARCHIVO BINARIO (BLOB)
+  //     const blobVideo = await respuesta.blob();
+
+  //     // Obtener el nombre del archivo enviado desde los encabezados del servidor (u otorgar uno por defecto)
+  //     const contentDisposition = respuesta.headers.get("Content-Disposition");
+  //     let nombreArchivo = `${nombre}`;
+  //     if (contentDisposition && contentDisposition.includes("filename=")) {
+  //       nombreArchivo = contentDisposition
+  //         .split("filename=")[1]
+  //         .replace(/['"]/g, "");
+  //     }
+
+  //     // Crear una URL local en el navegador del usuario apuntando al objeto binario
+  //     const urlBlobLocal = window.URL.createObjectURL(blobVideo);
+
+  //     // Crear elemento de descarga oculto e iniciarla de inmediato
+  //     const enlaceTemporal = document.createElement("a");
+  //     enlaceTemporal.href = urlBlobLocal;
+  //     enlaceTemporal.setAttribute("download", nombreArchivo);
+
+  //     document.body.appendChild(enlaceTemporal);
+  //     enlaceTemporal.click();
+
+  //     // Limpieza de memoria
+  //     document.body.removeChild(enlaceTemporal);
+  //     window.URL.revokeObjectURL(urlBlobLocal);
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     alert("Error: " + error.message);
+  //   } finally {
+  //     boton.innerText = "Descargar";
+  //     boton.disabled = false;
+  //   }
+  // });
 
   // boton.addEventListener("click", async () => {
   //   // 1. Obtén la URL del input (asegúrate de que el id coincida con tu HTML)
@@ -377,12 +570,18 @@ function mostrarPreview(url, titulo = "") {
   preview.classList.remove("oculto");
 }
 
+//let nombreFinal = "";
 function procesarBusqueda() {
   const url = document.getElementById("url").value;
-  const nombreFinal = url.split("/").pop().replace(".mp4", "");
-  console.log("Nombre final:", nombreFinal);
+  //const nombreFinal = url.split("/").pop().replace(".mp4", "");
+  //console.log("Nombre final:", nombreFinal);
   if (url.includes("redgifs.com")) {
     logo = "https://www.redgifs.com/static/logo-full-red-C9X7m0yF.svg";
+    nombreFinal = url.split("/").pop().replace(".mp4", "");
+  } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
+    logo = "https://www.twpornstars.com/favicon.ico";
+    const nomTemp = url.split("?")[0];
+    nombreFinal = nomTemp.split("/").pop().replace(".mp4", "");
   }
 
   const sitio = detectarSitio(url);
@@ -397,6 +596,17 @@ function procesarBusqueda() {
     //   (r) => r.json(),
     // );
 
+    const respuesta2 = await fetch(`${API}/obtener-enlace`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url }),
+    });
+
+    const datos2 = await respuesta.json();
+    console.log(datos);
+
     // video.src = datos.formats[0].url;
     const respuesta = await fetch(`${API}/buscar`, {
       method: "POST",
@@ -409,6 +619,7 @@ function procesarBusqueda() {
     const datos = await respuesta.json();
     console.log(datos);
   })();
+  console.log("Nombre final:", nombreFinal);
 
   mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
 

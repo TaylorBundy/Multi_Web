@@ -124,5 +124,46 @@ def buscar():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/obtener-enlace', methods=['POST'])
+def obtener_enlace_x():
+    data = request.json
+    url_video = data.get('url') # Aquí irá tu URL de X
+
+    if not url_video:
+        return jsonify({'error': 'No se proporcionó una URL'}), 400
+
+    # Configuración óptima para extraer enlaces de X (Twitter)
+    ydl_opts = {
+        'format': 'bestvideo+bestaudio/best', # Fuerza la mejor combinación
+        'quiet': True,
+        'no_warnings': True,
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            # Extrae la metadata sin descargar el archivo físico en el servidor
+            info = ydl.extract_info(url_video, download=False)
+            
+            # En plataformas como X, el enlace directo puede venir dentro de 'url' 
+            # o en el primer elemento de la lista de formatos disponibles
+            url_directa = info.get('url')
+            if not url_directa and 'formats' in info:
+                # Filtrar el formato con mejor resolución que tenga URL directa
+                formatos_validos = [f for f in info['formats'] if f.get('url')]
+                if formatos_validos:
+                    url_directa = formatos_validos[-1]['url'] # El último suele ser el de mejor calidad
+
+            if url_directa:
+                return jsonify({
+                    'success': True,
+                    'title': info.get('title', 'video_x'),
+                    'direct_url': url_directa
+                })
+            else:
+                return jsonify({'error': 'No se pudo encontrar un enlace directo para este video'}), 404
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
