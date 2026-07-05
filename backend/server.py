@@ -1,16 +1,28 @@
-from yt_dlp import YoutubeDL
+from flask import Flask, request, jsonify
 
-url = "https://x.com/Anal_Goonette/status/2073578608657064192/video/1"
+app = Flask(__name__)
 
-ydl_opts = {
-    "quiet": True,
-    "skip_download": True,
-}
+def obtener_metadata(url: str):
+    # Aquí iría la lógica para obtener metadatos
+    return {
+        "url": url,
+        "titulo": "Ejemplo",
+        "descripcion": "Descripción de ejemplo"
+    }
 
-with YoutubeDL(ydl_opts) as ydl:
-    info = ydl.extract_info(url, download=False)
+@app.post("/buscar")
+def buscar():
+    data = request.get_json(silent=True) or {}
+    url = data.get("url")
 
-print(info["title"])
+    if not url:
+        return jsonify({"error": "Debe enviar una URL"}), 400
 
-for f in info["formats"]:
-    print(f.get("height"), f.get("ext"), f.get("url"))
+    try:
+        resultado = obtener_metadata(url)
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

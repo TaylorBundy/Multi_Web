@@ -286,6 +286,20 @@ function procesarBusqueda() {
 
 function iniciarAplicacion() {
   document.getElementById("buscar").addEventListener("click", procesarBusqueda);
+  document.getElementById("buscar").addEventListener("click", async () => {
+    const url = document.getElementById("url").value;
+
+    const respuesta = await fetch("/buscar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url }),
+    });
+
+    const datos = await respuesta.json();
+    console.log(datos);
+  });
 }
 
 document.addEventListener("DOMContentLoaded", iniciarAplicacion);
