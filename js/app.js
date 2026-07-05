@@ -206,6 +206,22 @@ async function descargarVideo(url, nombre = "video.mp4") {
 }
 
 function mostrarDescarga(url, nombre) {
+  let tamano = null;
+  if (url.includes("redgifs.com")) {
+    logo = "https://www.redgifs.com/static/logo-full-red-C9X7m0yF.svg";
+    //nombreFinal = url.split("/").pop().replace(".mp4", "");
+  } else if (url.includes("pornhub")) {
+    logo = "https://ei.phncdn.com/pics/logos/10211.png?cache=2025091603";
+  } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
+    logo = "https://www.twpornstars.com/favicon.ico";
+    tamano = "30px";
+    //const nomTemp = url.split("?")[0];
+    //nombreFinal = nomTemp.split("/").pop().replace(".mp4", "");
+  } else if (url.includes("ssstwitter")) {
+    logo =
+      "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
+    tamano = "30px";
+  }
   mostrarResultado(`
         <div class="card">
             <h2>${nombre}</h2>
@@ -247,6 +263,9 @@ function mostrarDescarga(url, nombre) {
     imagenContainer.style.cssText = `position: relative; display: flex; justify-content: center; background-color: ${backgroundColor}; border-radius: 12px; padding: 5px;`;
 
     const imagen = document.createElement("img");
+    if (url.includes("ssstwitter")) {
+      imagen.style.width = tamano;
+    }
     imagen.src = logo;
     imagenContainer.appendChild(imagen);
 
@@ -316,6 +335,7 @@ function mostrarDescarga(url, nombre) {
       // 3. PROCESAMIENTO DEL FLUJO BINARIO (STREAM)
       // ==========================================
       const total = Number(respuesta.headers.get("content-length"));
+      console.log("Tamaño total:", total);
       if (!total) {
         porcentajeTexto.textContent = "Descargando...";
         detalle.textContent = "No se puede calcular el progreso total.";
@@ -402,7 +422,7 @@ function mostrarDescarga(url, nombre) {
       detalle.textContent = "Descarga completada";
       velocidadTexto.textContent = "Velocidad: 0 KB/s";
 
-      setTimeout(() => modal.remove(), 1200);
+      //setTimeout(() => modal.remove(), 1200);
     } catch (error) {
       console.error("Error:", error);
       alert("Error: " + error.message);
@@ -582,6 +602,9 @@ function procesarBusqueda() {
     logo = "https://www.twpornstars.com/favicon.ico";
     const nomTemp = url.split("?")[0];
     nombreFinal = nomTemp.split("/").pop().replace(".mp4", "");
+  } else if (url.includes("ssstwitter")) {
+    logo =
+      "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
   }
 
   const sitio = detectarSitio(url);
@@ -606,6 +629,9 @@ function procesarBusqueda() {
 
     const datos2 = await respuesta2.json();
     console.log(datos2);
+    if (url.includes("ssstwitter")) {
+      nombreFinal = datos2.title || "video";
+    }
 
     // video.src = datos.formats[0].url;
     const respuesta = await fetch(`${API}/buscar`, {
@@ -618,10 +644,9 @@ function procesarBusqueda() {
 
     const datos = await respuesta.json();
     console.log(datos);
+    console.log("Nombre final:", nombreFinal);
+    mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
   })();
-  console.log("Nombre final:", nombreFinal);
-
-  mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
 
   //   mostrarResultado(`
   //         <div class="card">
