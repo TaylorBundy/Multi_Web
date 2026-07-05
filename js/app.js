@@ -221,51 +221,130 @@ function mostrarDescarga(url, nombre) {
   //const boton = document.getElementById("btnDescargar");
 
   boton.addEventListener("click", async () => {
-    // 1. Obtén la URL del input (asegúrate de que el id coincida con tu HTML)
-    //const urlInput = document.getElementById("videoUrl").value;
+    const urlInput = document.getElementById("videoUrl").value;
 
-    if (!url) {
+    if (!urlInput) {
       alert("Por favor, ingresa una URL válida.");
       return;
     }
 
-    // Opcional: Cambiar el texto del botón para feedback visual
-    boton.innerText = "Procesando...";
+    boton.innerText = "Descargando en el servidor...";
     boton.disabled = true;
 
     try {
-      // 2. Hacer la petición HTTP POST al servidor Python (puerto 5000 por defecto en Flask)
       const respuesta = await fetch(`${API}/descargar`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: url }), // Envía la URL en formato JSON
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: urlInput }),
       });
 
-      const datos = await respuesta.json();
-
-      // 3. Procesar la respuesta del servidor
-      if (datos.success) {
-        // Opción A: Abrir el enlace de descarga directa en una nueva pestaña
-        window.open(datos.download_url, "_blank");
-
-        // Opción B (Alternativa si tienes un elemento <a> en tu HTML):
-        // const enlace = document.getElementById("miEnlace");
-        // enlace.href = datos.download_url;
-        // enlace.innerText = `Descargar: ${datos.title}`;
-      } else {
-        alert("Error del servidor: " + datos.error);
+      // Validar si el backend devolvió un error (que vendría en formato JSON)
+      if (!respuesta.ok) {
+        const errorDatos = await respuesta.json();
+        throw new Error(
+          errorDatos.error || "Error desconocido en el servidor.",
+        );
       }
+
+      // LEER LA RESPUESTA COMO ARCHIVO BINARIO (BLOB)
+      const blobVideo = await respuesta.blob();
+
+      // Obtener el nombre del archivo enviado desde los encabezados del servidor (u otorgar uno por defecto)
+      const contentDisposition = respuesta.headers.get("Content-Disposition");
+      let nombreArchivo = "video_descargado.mp4";
+      if (contentDisposition && contentDisposition.includes("filename=")) {
+        nombreArchivo = contentDisposition
+          .split("filename=")[1]
+          .replace(/['"]/g, "");
+      }
+
+      // Crear una URL local en el navegador del usuario apuntando al objeto binario
+      const urlBlobLocal = window.URL.createObjectURL(blobVideo);
+
+      // Crear elemento de descarga oculto e iniciarla de inmediato
+      const enlaceTemporal = document.createElement("a");
+      enlaceTemporal.href = urlBlobLocal;
+      enlaceTemporal.setAttribute("download", nombreArchivo);
+
+      document.body.appendChild(enlaceTemporal);
+      enlaceTemporal.click();
+
+      // Limpieza de memoria
+      document.body.removeChild(enlaceTemporal);
+      window.URL.revokeObjectURL(urlBlobLocal);
     } catch (error) {
-      console.error("Error de conexión:", error);
-      alert("No se pudo conectar con el servidor backend.");
+      console.error("Error:", error);
+      alert("Error: " + error.message);
     } finally {
-      // Restaurar el botón al finalizar
       boton.innerText = "Descargar";
       boton.disabled = false;
     }
   });
+
+  // boton.addEventListener("click", async () => {
+  //   // 1. Obtén la URL del input (asegúrate de que el id coincida con tu HTML)
+  //   //const urlInput = document.getElementById("videoUrl").value;
+
+  //   if (!url) {
+  //     alert("Por favor, ingresa una URL válida.");
+  //     return;
+  //   }
+
+  //   // Opcional: Cambiar el texto del botón para feedback visual
+  //   boton.innerText = "Procesando...";
+  //   boton.disabled = true;
+
+  //   try {
+  //     // 2. Hacer la petición HTTP POST al servidor Python (puerto 5000 por defecto en Flask)
+  //     const respuesta = await fetch(`${API}/descargar`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ url: url }), // Envía la URL en formato JSON
+  //     });
+
+  //     const datos = await respuesta.json();
+  //     console.log("Respuesta del servidor:", datos);
+
+  //     // 3. Procesar la respuesta del servidor
+  //     if (datos.success) {
+  //       // Opción A: Abrir el enlace de descarga directa en una nueva pestaña
+  //       //window.open(datos.download_url, "_blank");
+  //       // (async () => {
+  //       //   await descargarVideo(`${datos.download_url}`, `${datos.title}.mp4`);
+  //       // })();
+  //       // CREAR DESCARGA AUTOMÁTICA EN SEGUNDO PLANO
+  //       const enlaceTemporal = document.createElement("a");
+  //       enlaceTemporal.href = datos.download_url;
+  //       enlaceTemporal.download = `${datos.title || "video"}.mp4`; // Nombre sugerido para la descarga
+
+  //       // Sugiere un nombre de archivo para la descarga
+  //       enlaceTemporal.setAttribute(
+  //         "download",
+  //         `${datos.title || "video"}.mp4`,
+  //       );
+
+  //       // Configuración para evitar bloqueos del navegador
+  //       enlaceTemporal.target = "_blank";
+  //       enlaceTemporal.rel = "noopener noreferrer";
+
+  //       // Simular el clic para iniciar la descarga inmediata
+  //       document.body.appendChild(enlaceTemporal);
+  //       enlaceTemporal.click();
+  //       document.body.removeChild(enlaceTemporal); // Limpiar el documento
+  //     } else {
+  //       alert("Error: " + datos.error);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error de conexión:", error);
+  //     alert("No se pudo conectar con el servidor backend.");
+  //   } finally {
+  //     // Restaurar el botón al finalizar
+  //     boton.innerText = "Descargar";
+  //     boton.disabled = false;
+  //   }
+  // });
 
   // boton.onclick = () => {
   //   (async () => {
