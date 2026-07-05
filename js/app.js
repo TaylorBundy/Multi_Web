@@ -604,8 +604,8 @@ function procesarBusqueda() {
       body: JSON.stringify({ url }),
     });
 
-    const datos2 = await respuesta.json();
-    console.log(datos);
+    const datos2 = await respuesta2.json();
+    console.log(datos2);
 
     // video.src = datos.formats[0].url;
     const respuesta = await fetch(`${API}/buscar`, {

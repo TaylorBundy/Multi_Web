@@ -137,6 +137,7 @@ def obtener_enlace_x():
         'format': 'bestvideo+bestaudio/best', # Fuerza la mejor combinación
         'quiet': True,
         'no_warnings': True,
+        'cookiesfrombrowser': ('chrome',),
     }
 
     try:
