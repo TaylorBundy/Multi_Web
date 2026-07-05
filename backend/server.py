@@ -162,6 +162,7 @@ def obtener_enlace_x():
             if url_directa:
                 return jsonify({
                     'success': True,
+                    'todo': info,  # Devuelve toda la información extraída para depuración
                     'title': info.get('title', 'video_x'),
                     'direct_url': url_directa
                 })
