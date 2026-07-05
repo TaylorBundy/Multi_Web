@@ -422,7 +422,7 @@ function mostrarDescarga(url, nombre) {
       detalle.textContent = "Descarga completada";
       velocidadTexto.textContent = "Velocidad: 0 KB/s";
 
-      //setTimeout(() => modal.remove(), 1200);
+      setTimeout(() => modal.remove(), 1200);
     } catch (error) {
       console.error("Error:", error);
       alert("Error: " + error.message);
