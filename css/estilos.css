@@ -1,0 +1,65 @@
+* {
+  margin: 0;
+
+  padding: 0;
+
+  box-sizing: border-box;
+
+  font-family: Segoe UI;
+}
+
+body {
+  background: #ececec;
+}
+
+main {
+  width: 95%;
+
+  max-width: 1000px;
+
+  margin: auto;
+}
+
+.busqueda {
+  display: flex;
+
+  gap: 15px;
+
+  margin-top: 40px;
+}
+
+.busqueda input {
+  flex: 1;
+
+  padding: 15px;
+
+  border-radius: 10px;
+
+  border: 1px solid #bbb;
+}
+
+.preview {
+  margin-top: 30px;
+
+  background: #fff;
+
+  border-radius: 12px;
+
+  padding: 20px;
+
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+}
+
+.preview video {
+  width: 100%;
+
+  max-height: 500px;
+
+  border-radius: 10px;
+
+  background: black;
+}
+
+.oculto {
+  display: none;
+}

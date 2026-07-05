@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+
+    <title>Multi Video Downloader</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="css/estilos.css" />
+    <link rel="stylesheet" href="css/header.css" />
+    <link rel="stylesheet" href="css/tarjetas.css" />
+    <link rel="stylesheet" href="css/botones.css" />
+    <link rel="stylesheet" href="css/footer.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+
+  <body>
+    <header>
+      <div class="logo">🎬 Multi Video Downloader</div>
+    </header>
+
+    <main>
+      <section class="busqueda">
+        <input id="url" type="text" placeholder="Pegue aquí la URL del video" />
+
+        <button id="buscar">Buscar</button>
+      </section>
+
+      <section id="preview" class="preview oculto">
+        <video id="videoPreview" controls preload="metadata"></video>
+
+        <div id="videoInfo"></div>
+      </section>
+
+      <section id="resultado"></section>
+
+      <section id="resultado"></section>
+    </main>
+
+    <footer>© 2026</footer>
+
+    <script src="js/utilidades.js"></script>
+    <script src="js/variables_globales.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/modal.js"></script>
+    <!-- <script src="js/descargas.js"></script> -->
+    <script src="js/app.js"></script>
+  </body>
+</html>
