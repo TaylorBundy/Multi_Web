@@ -17,6 +17,8 @@ function detectarSitio(url) {
 
   if (url.includes("phncdn.com")) return "PornHub";
 
+  if (url.includes("pornhub.com")) return "PornHub";
+
   if (url.includes("tiktok")) return "tiktok";
 
   return null;

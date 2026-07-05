@@ -218,11 +218,60 @@ function mostrarDescarga(url, nombre) {
   const boton = document.getElementById("btnDescargar");
   boton.title = `Click para descargar: ${url}`;
   mostrarPreview(url, nombre);
-  boton.onclick = () => {
-    (async () => {
-      await descargarVideo(url, nombre);
-    })();
-  };
+  //const boton = document.getElementById("btnDescargar");
+
+  boton.addEventListener("click", async () => {
+    // 1. Obtén la URL del input (asegúrate de que el id coincida con tu HTML)
+    //const urlInput = document.getElementById("videoUrl").value;
+
+    if (!url) {
+      alert("Por favor, ingresa una URL válida.");
+      return;
+    }
+
+    // Opcional: Cambiar el texto del botón para feedback visual
+    boton.innerText = "Procesando...";
+    boton.disabled = true;
+
+    try {
+      // 2. Hacer la petición HTTP POST al servidor Python (puerto 5000 por defecto en Flask)
+      const respuesta = await fetch(`${API}/descargar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: url }), // Envía la URL en formato JSON
+      });
+
+      const datos = await respuesta.json();
+
+      // 3. Procesar la respuesta del servidor
+      if (datos.success) {
+        // Opción A: Abrir el enlace de descarga directa en una nueva pestaña
+        window.open(datos.download_url, "_blank");
+
+        // Opción B (Alternativa si tienes un elemento <a> en tu HTML):
+        // const enlace = document.getElementById("miEnlace");
+        // enlace.href = datos.download_url;
+        // enlace.innerText = `Descargar: ${datos.title}`;
+      } else {
+        alert("Error del servidor: " + datos.error);
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      alert("No se pudo conectar con el servidor backend.");
+    } finally {
+      // Restaurar el botón al finalizar
+      boton.innerText = "Descargar";
+      boton.disabled = false;
+    }
+  });
+
+  // boton.onclick = () => {
+  //   (async () => {
+  //     await descargarVideo(url, nombre);
+  //   })();
+  // };
 
   // document.getElementById("btnDescargar").addEventListener("click", () => {
   //   try {

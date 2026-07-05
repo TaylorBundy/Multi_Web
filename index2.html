@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Descargador de Video</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 50px;
+      }
+      .resultado {
+        margin-top: 20px;
+        display: none;
+      }
+      .error {
+        color: red;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Mi Descargador yt-dlp</h2>
+    <input
+      type="text"
+      id="videoUrl"
+      placeholder="Pega la URL del video aquí"
+      style="width: 300px; padding: 5px"
+    />
+    <button id="btnProcesar">Procesar Video</button>
+
+    <div id="errorMsg" class="error"></div>
+
+    <div id="resultado" class="resultado">
+      <h3 id="videoTitulo"></h3>
+      <a id="enlaceDescarga" href="#" target="_blank" download>
+        <button
+          style="
+            padding: 10px;
+            background: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+          "
+        >
+          ¡Descargar Video Aquí!
+        </button>
+      </a>
+    </div>
+
+    <script>
+      document
+        .getElementById("btnProcesar")
+        .addEventListener("click", async () => {
+          const urlInput = document.getElementById("videoUrl").value;
+          const resDiv = document.getElementById("resultado");
+          const errorDiv = document.getElementById("errorMsg");
+
+          // Limpiar estados anteriores
+          resDiv.style.display = "none";
+          errorDiv.innerText = "";
+
+          if (!urlInput) {
+            errorDiv.innerText = "Por favor, ingresa una URL válida.";
+            return;
+          }
+
+          try {
+            // Petición HTTP POST al backend de Python
+            const respuesta = await fetch("http://127.0.0:5000/descargar", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: urlInput }),
+            });
+
+            const datos = await respuesta.json();
+
+            if (datos.success) {
+              document.getElementById("videoTitulo").innerText = datos.title;
+              document.getElementById("enlaceDescarga").href =
+                datos.download_url;
+              resDiv.style.display = "block";
+            } else {
+              errorDiv.innerText = "Error: " + datos.error;
+            }
+          } catch (err) {
+            errorDiv.innerText = "No se pudo conectar con el servidor backend.";
+          }
+        });
+    </script>
+  </body>
+</html>
