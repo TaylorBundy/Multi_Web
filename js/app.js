@@ -263,6 +263,14 @@ function procesarBusqueda() {
 
     return;
   }
+  (async () => {
+    const datos = await fetch("/api/video?url=" + encodeURIComponent(url)).then(
+      (r) => r.json(),
+    );
+
+    video.src = datos.formats[0].url;
+  })();
+
   mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
 
   //   mostrarResultado(`
