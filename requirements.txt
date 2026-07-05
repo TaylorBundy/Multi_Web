@@ -3,5 +3,3 @@ requests
 flask-cors
 python-dotenv
 yt-dlp
-os
-glob
