@@ -1,3 +1,4 @@
+const API = "https://multi-web-uf1z.onrender.com";
 async function descargarVideo(url, nombre = "video.mp4") {
   // Modal
   const modal = document.createElement("div");
@@ -264,11 +265,21 @@ function procesarBusqueda() {
     return;
   }
   (async () => {
-    const datos = await fetch("/api/video?url=" + encodeURIComponent(url)).then(
-      (r) => r.json(),
-    );
+    // const datos = await fetch("/api/video?url=" + encodeURIComponent(url)).then(
+    //   (r) => r.json(),
+    // );
 
-    video.src = datos.formats[0].url;
+    // video.src = datos.formats[0].url;
+    const respuesta = await fetch(`${API}/buscar`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url }),
+    });
+
+    const datos = await respuesta.json();
+    console.log(datos);
   })();
 
   mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
@@ -286,20 +297,20 @@ function procesarBusqueda() {
 
 function iniciarAplicacion() {
   document.getElementById("buscar").addEventListener("click", procesarBusqueda);
-  document.getElementById("buscar").addEventListener("click", async () => {
-    const url = document.getElementById("url").value;
+  // document.getElementById("buscar").addEventListener("click", async () => {
+  //   const url = document.getElementById("url").value;
 
-    const respuesta = await fetch("/buscar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url }),
-    });
+  //   const respuesta = await fetch("/buscar", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ url }),
+  //   });
 
-    const datos = await respuesta.json();
-    console.log(datos);
-  });
+  //   const datos = await respuesta.json();
+  //   console.log(datos);
+  // });
 }
 
 document.addEventListener("DOMContentLoaded", iniciarAplicacion);
