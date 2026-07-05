@@ -148,6 +148,7 @@ def obtener_enlace_x():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             # Extrae la metadata sin descargar el archivo físico en el servidor
             info = ydl.extract_info(url_video, download=False)
+            print(f"Información extraída: {info}")  # Para depuración
             
             # En plataformas como X, el enlace directo puede venir dentro de 'url' 
             # o en el primer elemento de la lista de formatos disponibles
