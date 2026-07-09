@@ -19,6 +19,8 @@ function detectarSitio(url) {
 
   if (url.includes("pornhub.com")) return "PornHub";
 
+  if (url.includes("downixcdn.com")) return "PornHub";
+
   if (url.includes("video.twimg.com")) return "Twpornstars";
 
   if (url.includes("tiktok")) return "tiktok";
