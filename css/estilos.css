@@ -63,3 +63,12 @@ main {
 .oculto {
   display: none;
 }
+
+.loadingContainer {
+  display: flex;
+  width: 30px;
+}
+
+.tenor-gif-embed {
+  display: none;
+}

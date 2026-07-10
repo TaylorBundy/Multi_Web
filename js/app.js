@@ -1,3 +1,4 @@
+const loading = document.querySelector(".tenor-gif-embed");
 const API = "https://multi-web-uf1z.onrender.com";
 async function descargarVideo(url, nombre = "video.mp4") {
   // Modal
@@ -234,6 +235,7 @@ function mostrarDescarga(url, nombre) {
   const boton = document.getElementById("btnDescargar");
   boton.title = `Click para descargar: ${url}`;
   mostrarPreview(url, nombre);
+  loading.style.display = "none";
   //const boton = document.getElementById("btnDescargar");
 
   boton.addEventListener("click", async () => {
@@ -607,6 +609,21 @@ function procesarBusqueda() {
       "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
   } else if (url.includes("es.pornhub.com/view_video.php?viewkey")) {
     window.open("https://downix.org", "_blank");
+    setTimeout(() => {
+      window.close();
+    }, 5000); // 5 segundos
+    return;
+  } else if (
+    url.includes("x.com") ||
+    url.includes("/status/") ||
+    url.includes("/video/")
+  ) {
+    window.open("https://ssstwitter.com", "_blank");
+    //window.close();
+    //setTimeout(() => {
+    window.close();
+    //}, 3000); // 5 segundos
+    return;
   }
 
   const sitio = detectarSitio(url);
@@ -617,6 +634,7 @@ function procesarBusqueda() {
     return;
   }
   (async () => {
+    loading.style.display = "flex";
     // const datos = await fetch("/api/video?url=" + encodeURIComponent(url)).then(
     //   (r) => r.json(),
     // );
@@ -636,16 +654,16 @@ function procesarBusqueda() {
     }
 
     // video.src = datos.formats[0].url;
-    const respuesta = await fetch(`${API}/buscar`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url }),
-    });
+    // const respuesta = await fetch(`${API}/buscar`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({ url }),
+    // });
 
-    const datos = await respuesta.json();
-    console.log(datos);
+    // const datos = await respuesta.json();
+    // console.log(datos);
     console.log("Nombre final:", nombreFinal);
     mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
   })();
