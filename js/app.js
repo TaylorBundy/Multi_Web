@@ -605,6 +605,8 @@ function procesarBusqueda() {
   } else if (url.includes("ssstwitter")) {
     logo =
       "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
+  } else if (url.includes("es.pornhub.com/view_video.php?viewkey")) {
+    window.open("https://downix.org", "_blank");
   }
 
   const sitio = detectarSitio(url);
