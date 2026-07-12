@@ -594,6 +594,20 @@ function mostrarPreview(url, titulo = "") {
   preview.classList.remove("oculto");
 }
 
+function guardarVideo(nombre, enlace) {
+  const videos = JSON.parse(localStorage.getItem("videos")) || {};
+
+  videos[nombre] = enlace;
+
+  localStorage.setItem("videos", JSON.stringify(videos));
+}
+
+function obtenerEnlace(nombre) {
+  const videos = JSON.parse(localStorage.getItem("videos")) || {};
+
+  return videos[nombre] || null;
+}
+
 //let nombreFinal = "";
 function procesarBusqueda() {
   const url = document.getElementById("url").value;
@@ -615,6 +629,23 @@ function procesarBusqueda() {
       window.close();
     }, 5000); // 5 segundos
     return;
+  } else if (url.includes("https://ar.xhamster.com/videos/")) {
+    const nomTemp = url.split("/")[4];
+    //localStorage.setItem("xhamster_video", nomTemp);
+    guardarVideo(`${nomTemp}`, `${url}`);
+    const data = `${url}.-.${nomTemp}`;
+    navigator.clipboard.writeText(data);
+    window.open("https://www.locoloader.com/xhamster-downloader/", "_blank");
+    setTimeout(() => {
+      //window.close();
+    }, 5000); // 5 segundos
+  } else if (
+    url.includes("xhmediacdn") ||
+    url.includes("xhpingcdn") ||
+    url.includes("locoloader")
+  ) {
+    const texto = navigator.clipboard.readText();
+    nombreFinal = texto.split(".-.")[1];
   } else if (
     url.includes("x.com") ||
     url.includes("/status/") ||

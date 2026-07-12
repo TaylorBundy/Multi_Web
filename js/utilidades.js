@@ -21,6 +21,16 @@ function detectarSitio(url) {
 
   if (url.includes("nsf")) return "PornHub";
 
+  if (
+    url.includes("ahcdn") ||
+    url.includes("xhmediacdn") ||
+    url.includes("xhpingcdn") ||
+    url.includes("xhamster") ||
+    url.includes("xhamsterlive") ||
+    url.includes("xhamsterpremium")
+  )
+    return "xHamster";
+
   if (url.includes("downixcdn.com")) return "PornHub";
 
   if (url.includes("video.twimg.com")) return "Twpornstars";
