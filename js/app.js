@@ -646,14 +646,14 @@ function procesarBusqueda() {
     url.includes("xhpingcdn") ||
     url.includes("locoloader")
   ) {
-    (async () => {
-      texto = await navigator.clipboard.readText();
-      nombre = texto.split(".-.")[1];
-      console.log("Texto obtenido:", texto.split(".-."));
-    })();
-    const enlace = obtenerEnlace(nombre);
-    console.log("Enlace obtenido:", enlace);
-    nombreFinal = texto.split(".-.")[1];
+    // (async () => {
+    //   texto = await navigator.clipboard.readText();
+    //   nombre = texto.split(".-.")[1];
+    //   console.log("Texto obtenido:", texto.split(".-."));
+    // })();
+    // const enlace = obtenerEnlace(nombre);
+    // console.log("Enlace obtenido:", enlace);
+    // nombreFinal = texto.split(".-.")[1];
   } else if (
     url.includes("x.com") ||
     url.includes("/status/") ||
@@ -692,6 +692,14 @@ function procesarBusqueda() {
     console.log(datos2);
     if (url.includes("ssstwitter")) {
       nombreFinal = datos2.title || "video";
+    } else if (
+      url.includes("xhmediacdn") ||
+      url.includes("xhpingcdn") ||
+      url.includes("locoloader")
+    ) {
+      texto = await navigator.clipboard.readText();
+      nombre = texto.split(".-.")[1];
+      nombreFinal = nombre;
     }
 
     // video.src = datos.formats[0].url;
