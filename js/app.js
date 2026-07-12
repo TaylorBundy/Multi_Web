@@ -640,8 +640,9 @@ function procesarBusqueda() {
     //window.open("https://www.locoloader.com/xhamster-downloader/", "_blank");
     window.open("https://anyloader.com/xhamster-downloader", "_blank");
     setTimeout(() => {
-      //window.close();
+      window.close();
     }, 5000); // 5 segundos
+    return;
   } else if (
     url.includes("xhmediacdn") ||
     url.includes("xhpingcdn") ||
