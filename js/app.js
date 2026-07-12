@@ -611,6 +611,7 @@ function obtenerEnlace(nombre) {
 //let nombreFinal = "";
 function procesarBusqueda() {
   let texto = null;
+  let nombre = null;
   const url = document.getElementById("url").value;
   //const nombreFinal = url.split("/").pop().replace(".mp4", "");
   //console.log("Nombre final:", nombreFinal);
@@ -647,8 +648,11 @@ function procesarBusqueda() {
   ) {
     (async () => {
       texto = await navigator.clipboard.readText();
+      nombre = texto.split(".-.")[1];
       console.log("Texto obtenido:", texto.split(".-."));
     })();
+    const enlace = obtenerEnlace(nombre);
+    console.log("Enlace obtenido:", enlace);
     nombreFinal = texto.split(".-.")[1];
   } else if (
     url.includes("x.com") ||
