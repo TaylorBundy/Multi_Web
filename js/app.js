@@ -637,7 +637,8 @@ function procesarBusqueda() {
     guardarVideo(`${nomTemp}`, `${url}`);
     const data = `${url}.-.${nomTemp}`;
     navigator.clipboard.writeText(data);
-    window.open("https://www.locoloader.com/xhamster-downloader/", "_blank");
+    //window.open("https://www.locoloader.com/xhamster-downloader/", "_blank");
+    window.open("https://anyloader.com/xhamster-downloader", "_blank");
     setTimeout(() => {
       //window.close();
     }, 5000); // 5 segundos
