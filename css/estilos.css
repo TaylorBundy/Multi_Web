@@ -72,3 +72,16 @@ main {
 .tenor-gif-embed {
   display: none;
 }
+
+#buscar,
+#btnDescargar {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px;
+}
+
+#btnImage {
+  width: 16px;
+  /* height: 20px; */
+  margin-right: 5px;
+}

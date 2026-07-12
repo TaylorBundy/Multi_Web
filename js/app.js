@@ -228,7 +228,8 @@ function mostrarDescarga(url, nombre) {
             <h2>${nombre}</h2>
 
             <button id="btnDescargar">
-                📥 Descargar
+            <img id="btnImage" src="imagenes/descargar.avif" />
+                Descargar
             </button>
         </div>
     `);
@@ -249,7 +250,7 @@ function mostrarDescarga(url, nombre) {
       return;
     }
 
-    boton.innerText = "Procesando...";
+    boton.innerHTML = `<img id="btnImage" src="imagenes/procesando.avif" /> Procesando...`;
     boton.disabled = true;
 
     // ==========================================
@@ -430,7 +431,8 @@ function mostrarDescarga(url, nombre) {
       alert("Error: " + error.message);
       modal.remove(); // Remueve el modal si falla el proceso
     } finally {
-      boton.innerText = "Descargar";
+      //boton.innerText = "Descargar";
+      boton.innerHTML = `<img id="btnImage" src="imagenes/descargar.avif" />Descargar`;
       boton.disabled = false;
     }
   });
