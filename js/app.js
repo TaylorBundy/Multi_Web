@@ -610,6 +610,7 @@ function obtenerEnlace(nombre) {
 
 //let nombreFinal = "";
 function procesarBusqueda() {
+  let texto = null;
   const url = document.getElementById("url").value;
   //const nombreFinal = url.split("/").pop().replace(".mp4", "");
   //console.log("Nombre final:", nombreFinal);
@@ -644,7 +645,10 @@ function procesarBusqueda() {
     url.includes("xhpingcdn") ||
     url.includes("locoloader")
   ) {
-    const texto = navigator.clipboard.readText();
+    (async () => {
+      texto = await navigator.clipboard.readText();
+      console.log("Texto obtenido:", texto);
+    })();
     nombreFinal = texto.split(".-.")[1];
   } else if (
     url.includes("x.com") ||
