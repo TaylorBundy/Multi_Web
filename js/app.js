@@ -647,7 +647,7 @@ function procesarBusqueda() {
   ) {
     (async () => {
       texto = await navigator.clipboard.readText();
-      console.log("Texto obtenido:", texto);
+      console.log("Texto obtenido:", texto.split(".-."));
     })();
     nombreFinal = texto.split(".-.")[1];
   } else if (
