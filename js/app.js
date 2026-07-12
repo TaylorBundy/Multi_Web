@@ -696,7 +696,7 @@ function procesarBusqueda() {
     } else if (
       url.includes("xhmediacdn") ||
       url.includes("xhpingcdn") ||
-      url.includes("locoloader")
+      url.includes("xhcdn")
     ) {
       texto = await navigator.clipboard.readText();
       nombre = texto.split(".-.")[1];
