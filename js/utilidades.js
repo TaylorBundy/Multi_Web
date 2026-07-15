@@ -21,6 +21,8 @@ function detectarSitio(url) {
 
   if (url.includes("nsf")) return "PornHub";
 
+  if (url.includes("cdn2.onlyfans.com")) return "OnlyFans";
+
   if (
     url.includes("ahcdn") ||
     url.includes("xhmediacdn") ||
