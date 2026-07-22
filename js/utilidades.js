@@ -29,7 +29,9 @@ function detectarSitio(url) {
     url.includes("xhpingcdn") ||
     url.includes("xhamster") ||
     url.includes("xhcdn") ||
-    url.includes("xhamsterpremium")
+    url.includes("xhamsterpremium") ||
+    url.includes("media.fastdl") ||
+    url.includes("cdn77")
   )
     return "xHamster";
 
