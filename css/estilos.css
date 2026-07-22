@@ -25,10 +25,15 @@ main {
 
   gap: 15px;
 
-  margin-top: 40px;
+  margin-top: 10px;
 }
 
-.busqueda input {
+.nombreContainer {
+  margin-top: 10px;
+}
+
+.busqueda input,
+.nombreContainer input {
   flex: 1;
 
   padding: 15px;
