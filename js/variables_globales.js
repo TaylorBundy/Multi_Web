@@ -223,6 +223,8 @@ if (domain.includes("pornhub")) {
 } else if (domain.includes("loyalfans")) {
   logo = "https://cdn-static.loyalfans.com/assets/images/loyalfans-light.svg";
   logo1 = "https://cdn-static.loyalfans.com/assets/images/loyalfans.svg";
+} else if (domain.includes("instagram")) {
+  logo = "https://static.cdninstagram.com/rsrc.php/yr/r/rzWiSjZRxk5.webp";
 } else if (domain.includes("youtube")) {
   logo = "https://www.youtube.com/s/desktop/c90d512c/img/favicon_32x32.png";
   logo1 =
