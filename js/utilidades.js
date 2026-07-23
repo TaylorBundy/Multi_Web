@@ -31,6 +31,7 @@ function detectarSitio(url) {
     url.includes("xhcdn") ||
     url.includes("xhamsterpremium") ||
     url.includes("media.fastdl") ||
+    url.includes("fbcdn.net") ||
     url.includes("cdn77")
   )
     return "xHamster";

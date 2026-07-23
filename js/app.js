@@ -253,7 +253,11 @@ function mostrarDescarga(url, nombre) {
 
     boton.innerHTML = `<img id="btnImage" src="imagenes/procesando.avif" /> Procesando...`;
     boton.disabled = true;
-    if (url.includes("media.fastdl")) {
+    if (
+      url.includes("media.fastdl") ||
+      url.includes("downixcdn.com") ||
+      url.includes("fbcdn.net")
+    ) {
       descargarVideo(`${url}`, `${nombre}`);
     } else {
       // ==========================================
