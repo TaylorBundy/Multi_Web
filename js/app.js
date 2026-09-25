@@ -1,7 +1,9 @@
 const loading = document.querySelector(".tenor-gif-embed");
 const API = "https://multi-web-uf1z.onrender.com";
 const nombreArchivo = document.querySelector("#nombre");
+let tamano = null;
 async function descargarVideo(url, nombre = "video.mp4") {
+  console.log("URL:", url);
   // Modal
   const modal = document.createElement("div");
   modal.style.cssText = `
@@ -102,13 +104,21 @@ async function descargarVideo(url, nombre = "video.mp4") {
   document.body.appendChild(modal);
 
   try {
-    const res = await fetch(url);
+    // const res = await fetch(url);
+    const res = await fetch(url, {
+      credentials: "include",
+    });
+    console.log("Status:", res.status);
+    console.log("Content-Length:", res.headers.get("content-length"));
+    console.log("Content-Type:", res.headers.get("content-type"));
+    console.log("Body:", res.body);
 
     if (!res.ok) {
       throw new Error(`Error ${res.status}`);
     }
 
     const total = Number(res.headers.get("content-length"));
+    console.log(total);
 
     if (!total) {
       porcentajeTexto.textContent = "Descargando...";
@@ -207,8 +217,436 @@ async function descargarVideo(url, nombre = "video.mp4") {
   }
 }
 
+async function descargarDesdeServidor2(url, nombre = "video.mp4") {
+  const respuesta = await fetch(`${API}/descargar`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ url }),
+  });
+
+  if (!respuesta.ok) {
+    throw new Error(`Error ${respuesta.status}`);
+  }
+
+  const total = Number(respuesta.headers.get("content-length"));
+
+  console.log("Tamaño total:", total);
+
+  const reader = respuesta.body.getReader();
+
+  const chunks = [];
+  let descargado = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+
+    if (done) break;
+
+    chunks.push(value);
+    descargado += value.length;
+
+    if (total) {
+      const porcentaje = (descargado / total) * 100;
+
+      console.log(
+        `${porcentaje.toFixed(1)}%`,
+        `${(descargado / 1024 / 1024).toFixed(2)} MB`,
+      );
+    }
+  }
+
+  const blob = new Blob(chunks);
+
+  const enlace = document.createElement("a");
+  enlace.href = URL.createObjectURL(blob);
+  enlace.download = nombre;
+
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+
+  URL.revokeObjectURL(enlace.href);
+}
+
+async function descargarDesdeServidor(url, nombre = "video.mp4") {
+  const backgroundColor = "#f0f0f0";
+
+  // ==========================================
+  // MODAL
+  // ==========================================
+
+  const modal = document.createElement("div");
+
+  modal.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999999;
+        font-family: Arial, sans-serif;
+    `;
+
+  const contenido = document.createElement("div");
+
+  contenido.style.cssText = `
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        width: 370px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,.3);
+        color: black;
+    `;
+
+  // ==========================================
+  // LOGO
+  // ==========================================
+
+  const imagenContainer = document.createElement("div");
+
+  imagenContainer.style.cssText = `
+        position: relative;
+        display: flex;
+        justify-content: center;
+        background-color: ${backgroundColor};
+        border-radius: 12px;
+        padding: 5px;
+    `;
+
+  const imagen = document.createElement("img");
+  if (url.includes("ssstwitter")) {
+    imagen.style.width = tamano;
+  }
+  imagen.src = logo;
+
+  if (typeof tamano !== "undefined" && tamano) {
+    imagen.style.width = tamano;
+  }
+
+  imagenContainer.appendChild(imagen);
+
+  // ==========================================
+  // TITULO
+  // ==========================================
+
+  const titulo = document.createElement("div");
+
+  titulo.style.cssText = `
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        word-break: break-word;
+    `;
+
+  titulo.textContent = `📥 Descargando: ${nombre}`;
+
+  // ==========================================
+  // PORCENTAJE
+  // ==========================================
+
+  const porcentajeTexto = document.createElement("div");
+
+  porcentajeTexto.style.cssText = `
+        font-size: 20px;
+        margin-bottom: 10px;
+    `;
+
+  porcentajeTexto.textContent = "Conectando...";
+
+  // ==========================================
+  // BARRA
+  // ==========================================
+
+  const barra = document.createElement("div");
+
+  barra.style.cssText = `
+        width: 100%;
+        height: 20px;
+        background: #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    `;
+
+  const progreso = document.createElement("div");
+
+  progreso.style.cssText = `
+        width: 0%;
+        height: 100%;
+        background: #4caf50;
+        transition: width .2s;
+    `;
+
+  barra.appendChild(progreso);
+
+  // ==========================================
+  // DETALLE / ETA
+  // ==========================================
+
+  const detalle = document.createElement("div");
+
+  detalle.style.cssText = `
+        font-size: 12px;
+        color: #666;
+        margin-top: 8px;
+    `;
+
+  // ==========================================
+  // VELOCIDAD
+  // ==========================================
+
+  const velocidadTexto = document.createElement("div");
+
+  velocidadTexto.style.cssText = `
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+    `;
+
+  velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+  // ==========================================
+  // ARMAR MODAL
+  // ==========================================
+
+  contenido.append(
+    imagenContainer,
+    titulo,
+    porcentajeTexto,
+    barra,
+    detalle,
+    velocidadTexto,
+  );
+
+  modal.appendChild(contenido);
+
+  document.body.appendChild(modal);
+
+  // ==========================================
+  // DESCARGA
+  // ==========================================
+
+  try {
+    const respuesta = await fetch(`${API}/descargar`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        url: url,
+      }),
+    });
+
+    console.log("Status:", respuesta.status);
+
+    if (!respuesta.ok) {
+      let mensaje = `Error ${respuesta.status}`;
+
+      try {
+        const datos = await respuesta.json();
+
+        if (datos.error) {
+          mensaje = datos.error;
+        }
+      } catch (_) {}
+
+      throw new Error(mensaje);
+    }
+
+    // ==========================================
+    // NOMBRE DEL ARCHIVO
+    // ==========================================
+
+    const contentDisposition = respuesta.headers.get("Content-Disposition");
+
+    let nombreArchivo = nombre;
+
+    if (contentDisposition && contentDisposition.includes("filename=")) {
+      nombreArchivo = contentDisposition
+        .split("filename=")[1]
+        .replace(/['"]/g, "");
+    }
+
+    titulo.textContent = `📥 Descargando: ${nombreArchivo}`;
+
+    // ==========================================
+    // TAMAÑO TOTAL
+    // ==========================================
+
+    const contentLength = respuesta.headers.get("content-length");
+
+    const total = contentLength ? Number(contentLength) : null;
+
+    console.log("Content-Length:", contentLength);
+    console.log("Tamaño total:", total);
+
+    if (!total) {
+      porcentajeTexto.textContent = "Descargando...";
+
+      detalle.textContent = "No se puede calcular el progreso total.";
+    }
+
+    // ==========================================
+    // STREAM
+    // ==========================================
+
+    const reader = respuesta.body.getReader();
+
+    const chunks = [];
+
+    let descargado = 0;
+
+    // ==========================================
+    // VELOCIDAD
+    // ==========================================
+
+    let ultimoTiempo = performance.now();
+
+    let ultimoDescargado = 0;
+
+    // ==========================================
+    // LECTURA
+    // ==========================================
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        break;
+      }
+
+      chunks.push(value);
+
+      descargado += value.length;
+
+      // ======================================
+      // VELOCIDAD
+      // ======================================
+
+      const ahora = performance.now();
+
+      const tiempo = (ahora - ultimoTiempo) / 1000;
+
+      if (tiempo >= 0.5) {
+        const bytesIntervalo = descargado - ultimoDescargado;
+
+        const velocidad = bytesIntervalo / tiempo;
+
+        let textoVelocidad;
+
+        if (velocidad >= 1024 * 1024) {
+          textoVelocidad = `${(velocidad / 1024 / 1024).toFixed(2)} MB/s`;
+        } else if (velocidad >= 1024) {
+          textoVelocidad = `${(velocidad / 1024).toFixed(2)} KB/s`;
+        } else {
+          textoVelocidad = `${velocidad.toFixed(0)} B/s`;
+        }
+
+        velocidadTexto.textContent = `Velocidad: ${textoVelocidad}`;
+
+        ultimoTiempo = ahora;
+
+        ultimoDescargado = descargado;
+
+        // ==================================
+        // ETA
+        // ==================================
+
+        if (total && velocidad > 0) {
+          const restante = total - descargado;
+
+          const segundos = restante / velocidad;
+
+          let eta;
+
+          if (segundos >= 3600) {
+            eta = `${Math.floor(segundos / 3600)}h ${Math.floor(
+              (segundos % 3600) / 60,
+            )}m`;
+          } else if (segundos >= 60) {
+            eta = `${Math.floor(segundos / 60)}m ${Math.floor(segundos % 60)}s`;
+          } else {
+            eta = `${Math.ceil(segundos)} s`;
+          }
+
+          detalle.textContent = `${(descargado / 1024 / 1024).toFixed(
+            2,
+          )} MB / ${(total / 1024 / 1024).toFixed(2)} MB • ETA: ${eta}`;
+        }
+      }
+
+      // ======================================
+      // PORCENTAJE
+      // ======================================
+
+      if (total) {
+        const porcentaje = ((descargado / total) * 100).toFixed(1);
+
+        porcentajeTexto.textContent = `${porcentaje}%`;
+
+        progreso.style.width = `${porcentaje}%`;
+      }
+    }
+
+    // ==========================================
+    // CREAR BLOB
+    // ==========================================
+
+    const blob = new Blob(chunks, {
+      type: "video/mp4",
+    });
+
+    const urlBlob = URL.createObjectURL(blob);
+
+    // ==========================================
+    // DESCARGA DEL NAVEGADOR
+    // ==========================================
+
+    const enlace = document.createElement("a");
+
+    enlace.href = urlBlob;
+
+    enlace.download = nombreArchivo;
+
+    document.body.appendChild(enlace);
+
+    enlace.click();
+
+    enlace.remove();
+
+    URL.revokeObjectURL(urlBlob);
+
+    // ==========================================
+    // FINALIZADO
+    // ==========================================
+
+    porcentajeTexto.textContent = "100%";
+
+    progreso.style.width = "100%";
+
+    detalle.textContent = "Descarga completada";
+
+    velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+    setTimeout(() => {
+      modal.remove();
+    }, 1200);
+  } catch (error) {
+    console.error("Error descargando:", error);
+
+    modal.remove();
+
+    throw error;
+  }
+}
+
 function mostrarDescarga(url, nombre) {
-  let tamano = null;
   if (url.includes("redgifs.com")) {
     logo = "https://www.redgifs.com/static/logo-full-red-C9X7m0yF.svg";
     //nombreFinal = url.split("/").pop().replace(".mp4", "");
@@ -253,196 +691,206 @@ function mostrarDescarga(url, nombre) {
 
     boton.innerHTML = `<img id="btnImage" src="imagenes/procesando.avif" /> Procesando...`;
     boton.disabled = true;
-    if (
-      url.includes("media.fastdl") ||
-      url.includes("downixcdn.com") ||
-      url.includes("fbcdn.net")
-    ) {
-      descargarVideo(`${url}`, `${nombre}`);
-    } else {
-      // ==========================================
-      // 1. CREACIÓN DEL MODAL (Tu diseño original)
-      // ==========================================
-      const modal = document.createElement("div");
-      modal.style.cssText = `position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 999999; font-family: Arial, sans-serif;`;
+    (async () => {
+      await descargarDesdeServidor(url, `${nombre}`);
+    })();
+    // if (
+    //   url.includes("media.fastdl") ||
+    //   url.includes("downixcdn.com") ||
+    //   url.includes("fbcdn.net") ||
+    //   url.includes("media.redgifs") ||
+    //   url.includes("ssscdn.io/ssstwitter")
+    // ) {
+    //   (async () => {
+    //     await descargarDesdeServidor(url, `${nombre}.mp4`);
+    //   })();
+    //   // (async () => {
+    //   //   await descargarVideo(url, `${nombre}.mp4`);
+    //   // })();
+    // } else {
+    //   // ==========================================
+    //   // 1. CREACIÓN DEL MODAL (Tu diseño original)
+    //   // ==========================================
+    //   const modal = document.createElement("div");
+    //   modal.style.cssText = `position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 999999; font-family: Arial, sans-serif;`;
 
-      const contenido = document.createElement("div");
-      contenido.style.cssText = `background: white; padding: 20px; border-radius: 12px; width: 370px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,.3); color: black;`;
+    //   const contenido = document.createElement("div");
+    //   contenido.style.cssText = `background: white; padding: 20px; border-radius: 12px; width: 370px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,.3); color: black;`;
 
-      const imagenContainer = document.createElement("div");
-      imagenContainer.style.cssText = `position: relative; display: flex; justify-content: center; background-color: ${backgroundColor}; border-radius: 12px; padding: 5px;`;
+    //   const imagenContainer = document.createElement("div");
+    //   imagenContainer.style.cssText = `position: relative; display: flex; justify-content: center; background-color: ${backgroundColor}; border-radius: 12px; padding: 5px;`;
 
-      const imagen = document.createElement("img");
-      if (url.includes("ssstwitter")) {
-        imagen.style.width = tamano;
-      }
-      imagen.src = logo;
-      imagenContainer.appendChild(imagen);
+    //   const imagen = document.createElement("img");
+    //   if (url.includes("ssstwitter")) {
+    //     imagen.style.width = tamano;
+    //   }
+    //   imagen.src = logo;
+    //   imagenContainer.appendChild(imagen);
 
-      const titulo = document.createElement("div");
-      titulo.style.cssText = `font-size: 16px; font-weight: bold; margin-bottom: 15px; word-break: break-word;`;
-      titulo.textContent = `📥 Procesando video...`;
+    //   const titulo = document.createElement("div");
+    //   titulo.style.cssText = `font-size: 16px; font-weight: bold; margin-bottom: 15px; word-break: break-word;`;
+    //   titulo.textContent = `📥 Procesando video...`;
 
-      const porcentajeTexto = document.createElement("div");
-      porcentajeTexto.style.cssText = `font-size: 20px; margin-bottom: 10px;`;
-      porcentajeTexto.textContent = "Conectando...";
+    //   const porcentajeTexto = document.createElement("div");
+    //   porcentajeTexto.style.cssText = `font-size: 20px; margin-bottom: 10px;`;
+    //   porcentajeTexto.textContent = "Conectando...";
 
-      const barra = document.createElement("div");
-      barra.style.cssText = `width: 100%; height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 10px;`;
+    //   const barra = document.createElement("div");
+    //   barra.style.cssText = `width: 100%; height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 10px;`;
 
-      const progreso = document.createElement("div");
-      progreso.style.cssText = `width: 0%; height: 100%; background: #4caf50; transition: width .2s;`;
-      barra.appendChild(progreso);
+    //   const progreso = document.createElement("div");
+    //   progreso.style.cssText = `width: 0%; height: 100%; background: #4caf50; transition: width .2s;`;
+    //   barra.appendChild(progreso);
 
-      const detalle = document.createElement("div");
-      detalle.style.cssText = `font-size: 12px; color: #666; margin-top: 8px;`;
+    //   const detalle = document.createElement("div");
+    //   detalle.style.cssText = `font-size: 12px; color: #666; margin-top: 8px;`;
 
-      const velocidadTexto = document.createElement("div");
-      velocidadTexto.style.cssText = `font-size: 12px; color: #666; margin-top: 4px;`;
-      velocidadTexto.textContent = "Velocidad: 0 KB/s";
+    //   const velocidadTexto = document.createElement("div");
+    //   velocidadTexto.style.cssText = `font-size: 12px; color: #666; margin-top: 4px;`;
+    //   velocidadTexto.textContent = "Velocidad: 0 KB/s";
 
-      contenido.append(
-        imagenContainer,
-        titulo,
-        porcentajeTexto,
-        barra,
-        detalle,
-        velocidadTexto,
-      );
-      modal.appendChild(contenido);
-      document.body.appendChild(modal);
+    //   contenido.append(
+    //     imagenContainer,
+    //     titulo,
+    //     porcentajeTexto,
+    //     barra,
+    //     detalle,
+    //     velocidadTexto,
+    //   );
+    //   modal.appendChild(contenido);
+    //   document.body.appendChild(modal);
 
-      try {
-        // ==========================================
-        // 2. PETICIÓN POST AL SERVIDOR PYTHON
-        // ==========================================
-        const respuesta = await fetch(`${API}/descargar`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: url }),
-        });
+    //   try {
+    //     // ==========================================
+    //     // 2. PETICIÓN POST AL SERVIDOR PYTHON
+    //     // ==========================================
+    //     const respuesta = await fetch(`${API}/descargar`, {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({ url: url }),
+    //     });
 
-        if (!respuesta.ok) {
-          const errorDatos = await respuesta.json();
-          throw new Error(
-            errorDatos.error || "Error desconocido en el servidor.",
-          );
-        }
+    //     if (!respuesta.ok) {
+    //       const errorDatos = await respuesta.json();
+    //       throw new Error(
+    //         errorDatos.error || "Error desconocido en el servidor.",
+    //       );
+    //     }
 
-        // Obtener nombre del archivo desde las cabeceras
-        const contentDisposition = respuesta.headers.get("Content-Disposition");
-        let nombreArchivo = `${nombre}`; // Valor por defecto
-        if (contentDisposition && contentDisposition.includes("filename=")) {
-          nombreArchivo = contentDisposition
-            .split("filename=")[1]
-            .replace(/['"]/g, "");
-        }
+    //     // Obtener nombre del archivo desde las cabeceras
+    //     const contentDisposition = respuesta.headers.get("Content-Disposition");
+    //     let nombreArchivo = `${nombre}`; // Valor por defecto
+    //     if (contentDisposition && contentDisposition.includes("filename=")) {
+    //       nombreArchivo = contentDisposition
+    //         .split("filename=")[1]
+    //         .replace(/['"]/g, "");
+    //     }
 
-        // Actualizar título del modal con el nombre real obtenido
-        titulo.textContent = `📥 Descargando: ${nombreArchivo}`;
+    //     // Actualizar título del modal con el nombre real obtenido
+    //     titulo.textContent = `📥 Descargando: ${nombreArchivo}`;
 
-        // ==========================================
-        // 3. PROCESAMIENTO DEL FLUJO BINARIO (STREAM)
-        // ==========================================
-        const total = Number(respuesta.headers.get("content-length"));
-        console.log("Tamaño total:", total);
-        if (!total) {
-          porcentajeTexto.textContent = "Descargando...";
-          detalle.textContent = "No se puede calcular el progreso total.";
-        }
+    //     // ==========================================
+    //     // 3. PROCESAMIENTO DEL FLUJO BINARIO (STREAM)
+    //     // ==========================================
+    //     const total = Number(respuesta.headers.get("content-length"));
+    //     console.log("Tamaño total:", total);
+    //     if (!total) {
+    //       porcentajeTexto.textContent = "Descargando...";
+    //       detalle.textContent = "No se puede calcular el progreso total.";
+    //     }
 
-        const reader = respuesta.body.getReader();
-        const chunks = [];
-        let descargado = 0;
+    //     const reader = respuesta.body.getReader();
+    //     const chunks = [];
+    //     let descargado = 0;
 
-        let ultimoTiempo = performance.now();
-        let ultimoDescargado = 0;
+    //     let ultimoTiempo = performance.now();
+    //     let ultimoDescargado = 0;
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+    //     while (true) {
+    //       const { done, value } = await reader.read();
+    //       if (done) break;
 
-          chunks.push(value);
-          descargado += value.length;
+    //       chunks.push(value);
+    //       descargado += value.length;
 
-          const ahora = performance.now();
-          const tiempo = (ahora - ultimoTiempo) / 1000;
+    //       const ahora = performance.now();
+    //       const tiempo = (ahora - ultimoTiempo) / 1000;
 
-          if (tiempo >= 0.5) {
-            const bytesIntervalo = descargado - ultimoDescargado;
-            const velocidad = bytesIntervalo / tiempo;
-            let textoVelocidad;
+    //       if (tiempo >= 0.5) {
+    //         const bytesIntervalo = descargado - ultimoDescargado;
+    //         const velocidad = bytesIntervalo / tiempo;
+    //         let textoVelocidad;
 
-            if (velocidad >= 1024 * 1024) {
-              textoVelocidad = `${(velocidad / 1024 / 1024).toFixed(2)} MB/s`;
-            } else if (velocidad >= 1024) {
-              textoVelocidad = `${(velocidad / 1024).toFixed(2)} KB/s`;
-            } else {
-              textoVelocidad = `${velocidad.toFixed(0)} B/s`;
-            }
+    //         if (velocidad >= 1024 * 1024) {
+    //           textoVelocidad = `${(velocidad / 1024 / 1024).toFixed(2)} MB/s`;
+    //         } else if (velocidad >= 1024) {
+    //           textoVelocidad = `${(velocidad / 1024).toFixed(2)} KB/s`;
+    //         } else {
+    //           textoVelocidad = `${velocidad.toFixed(0)} B/s`;
+    //         }
 
-            velocidadTexto.textContent = `Velocidad: ${textoVelocidad}`;
-            ultimoTiempo = ahora;
-            ultimoDescargado = descargado;
+    //         velocidadTexto.textContent = `Velocidad: ${textoVelocidad}`;
+    //         ultimoTiempo = ahora;
+    //         ultimoDescargado = descargado;
 
-            if (total && velocidad > 0) {
-              const restante = total - descargado;
-              const segundos = restante / velocidad;
-              let eta;
+    //         if (total && velocidad > 0) {
+    //           const restante = total - descargado;
+    //           const segundos = restante / velocidad;
+    //           let eta;
 
-              if (segundos >= 3600) {
-                eta = `${Math.floor(segundos / 3600)}h ${Math.floor((segundos % 3600) / 60)}m`;
-              } else if (segundos >= 60) {
-                eta = `${Math.floor(segundos / 60)}m ${Math.floor(segundos % 60)}s`;
-              } else {
-                eta = `${Math.ceil(segundos)} s`;
-              }
+    //           if (segundos >= 3600) {
+    //             eta = `${Math.floor(segundos / 3600)}h ${Math.floor((segundos % 3600) / 60)}m`;
+    //           } else if (segundos >= 60) {
+    //             eta = `${Math.floor(segundos / 60)}m ${Math.floor(segundos % 60)}s`;
+    //           } else {
+    //             eta = `${Math.ceil(segundos)} s`;
+    //           }
 
-              detalle.textContent = `${(descargado / 1024 / 1024).toFixed(2)} MB / ${(total / 1024 / 1024).toFixed(2)} MB • ETA: ${eta}`;
-            }
-          }
+    //           detalle.textContent = `${(descargado / 1024 / 1024).toFixed(2)} MB / ${(total / 1024 / 1024).toFixed(2)} MB • ETA: ${eta}`;
+    //         }
+    //       }
 
-          if (total) {
-            const porcentaje = ((descargado / total) * 100).toFixed(1);
-            porcentajeTexto.textContent = `${porcentaje}%`;
-            progreso.style.width = `${porcentaje}%`;
-          }
-        }
+    //       if (total) {
+    //         const porcentaje = ((descargado / total) * 100).toFixed(1);
+    //         porcentajeTexto.textContent = `${porcentaje}%`;
+    //         progreso.style.width = `${porcentaje}%`;
+    //       }
+    //     }
 
-        // ==========================================
-        // 4. DESCARGA FINAL AUTOMÁTICA EN CLIENTE
-        // ==========================================
-        const blob = new Blob(chunks);
-        const urlBlobLocal = window.URL.createObjectURL(blob);
+    //     // ==========================================
+    //     // 4. DESCARGA FINAL AUTOMÁTICA EN CLIENTE
+    //     // ==========================================
+    //     const blob = new Blob(chunks);
+    //     const urlBlobLocal = window.URL.createObjectURL(blob);
 
-        const enlaceTemporal = document.createElement("a");
-        enlaceTemporal.href = urlBlobLocal;
-        enlaceTemporal.setAttribute("download", nombreArchivo);
+    //     const enlaceTemporal = document.createElement("a");
+    //     enlaceTemporal.href = urlBlobLocal;
+    //     enlaceTemporal.setAttribute("download", nombreArchivo);
 
-        document.body.appendChild(enlaceTemporal);
-        enlaceTemporal.click();
+    //     document.body.appendChild(enlaceTemporal);
+    //     enlaceTemporal.click();
 
-        // Limpieza
-        document.body.removeChild(enlaceTemporal);
-        window.URL.revokeObjectURL(urlBlobLocal);
+    //     // Limpieza
+    //     document.body.removeChild(enlaceTemporal);
+    //     window.URL.revokeObjectURL(urlBlobLocal);
 
-        // Feedback de éxito
-        porcentajeTexto.textContent = "100%";
-        progreso.style.width = "100%";
-        detalle.textContent = "Descarga completada";
-        velocidadTexto.textContent = "Velocidad: 0 KB/s";
+    //     // Feedback de éxito
+    //     porcentajeTexto.textContent = "100%";
+    //     progreso.style.width = "100%";
+    //     detalle.textContent = "Descarga completada";
+    //     velocidadTexto.textContent = "Velocidad: 0 KB/s";
 
-        setTimeout(() => modal.remove(), 1200);
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Error: " + error.message);
-        modal.remove(); // Remueve el modal si falla el proceso
-      } finally {
-        //boton.innerText = "Descargar";
-        boton.innerHTML = `<img id="btnImage" src="imagenes/descargar.avif" />Descargar`;
-        boton.disabled = false;
-      }
-    }
+    //     setTimeout(() => modal.remove(), 1200);
+    //   } catch (error) {
+    //     console.error("Error:", error);
+    //     alert("Error: " + error.message);
+    //     modal.remove(); // Remueve el modal si falla el proceso
+    //   } finally {
+    //     //boton.innerText = "Descargar";
+    //     boton.innerHTML = `<img id="btnImage" src="imagenes/descargar.avif" />Descargar`;
+    //     boton.disabled = false;
+    //   }
+    // }
   });
 
   // boton.addEventListener("click", async () => {
