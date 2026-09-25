@@ -676,6 +676,7 @@ function mostrarDescarga(url, nombre) {
   const boton = document.getElementById("btnDescargar");
   boton.title = `Click para descargar: ${url}`;
   if (url.includes("media.redgifs.com")) {
+    console.log("jaja");
     mostrarPreviewRedgifs(url, nombre);
   } else {
     mostrarPreview(url, nombre);
@@ -1079,7 +1080,7 @@ function mostrarPreview2(url, titulo = "") {
   });
 }
 
-function mostrarPreviewRedgifs(url, titulo = "") {
+function mostrarPreviewRedgifs2(url, titulo = "") {
   const video = document.getElementById("videoPreview");
   const info = document.getElementById("videoInfo");
   const preview = document.getElementById("preview");
@@ -1096,6 +1097,45 @@ function mostrarPreviewRedgifs(url, titulo = "") {
 
   video.oncanplay = () => {
     video.play().catch(() => {});
+  };
+}
+
+function mostrarPreviewRedgifs(url, titulo = "") {
+  const preview = document.getElementById("preview");
+  const video = document.getElementById("videoPreview");
+  const info = document.getElementById("videoInfo");
+
+  video.pause();
+  video.removeAttribute("src");
+
+  info.textContent = titulo;
+  preview.classList.remove("oculto");
+
+  video.src = url;
+  video.load();
+
+  video.onloadedmetadata = () => {
+    console.log("Metadata cargada");
+    console.log("Duración:", video.duration);
+
+    video
+      .play()
+      .then(() => {
+        console.log("Reproduciendo");
+      })
+      .catch((error) => {
+        console.error("Error al reproducir:", error);
+      });
+  };
+
+  video.onerror = () => {
+    console.error("Error del video:");
+    console.error(video.error);
+
+    if (video.error) {
+      console.error("Código:", video.error.code);
+      console.error("Mensaje:", video.error.message);
+    }
   };
 }
 
