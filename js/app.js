@@ -217,58 +217,58 @@ async function descargarVideo(url, nombre = "video.mp4") {
   }
 }
 
-async function descargarDesdeServidor2(url, nombre = "video.mp4") {
-  const respuesta = await fetch(`${API}/descargar`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ url }),
-  });
+// async function descargarDesdeServidor2(url, nombre = "video.mp4") {
+//   const respuesta = await fetch(`${API}/descargar`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({ url }),
+//   });
 
-  if (!respuesta.ok) {
-    throw new Error(`Error ${respuesta.status}`);
-  }
+//   if (!respuesta.ok) {
+//     throw new Error(`Error ${respuesta.status}`);
+//   }
 
-  const total = Number(respuesta.headers.get("content-length"));
+//   const total = Number(respuesta.headers.get("content-length"));
 
-  console.log("Tamaño total:", total);
+//   console.log("Tamaño total:", total);
 
-  const reader = respuesta.body.getReader();
+//   const reader = respuesta.body.getReader();
 
-  const chunks = [];
-  let descargado = 0;
+//   const chunks = [];
+//   let descargado = 0;
 
-  while (true) {
-    const { done, value } = await reader.read();
+//   while (true) {
+//     const { done, value } = await reader.read();
 
-    if (done) break;
+//     if (done) break;
 
-    chunks.push(value);
-    descargado += value.length;
+//     chunks.push(value);
+//     descargado += value.length;
 
-    if (total) {
-      const porcentaje = (descargado / total) * 100;
+//     if (total) {
+//       const porcentaje = (descargado / total) * 100;
 
-      console.log(
-        `${porcentaje.toFixed(1)}%`,
-        `${(descargado / 1024 / 1024).toFixed(2)} MB`,
-      );
-    }
-  }
+//       console.log(
+//         `${porcentaje.toFixed(1)}%`,
+//         `${(descargado / 1024 / 1024).toFixed(2)} MB`,
+//       );
+//     }
+//   }
 
-  const blob = new Blob(chunks);
+//   const blob = new Blob(chunks);
 
-  const enlace = document.createElement("a");
-  enlace.href = URL.createObjectURL(blob);
-  enlace.download = nombre;
+//   const enlace = document.createElement("a");
+//   enlace.href = URL.createObjectURL(blob);
+//   enlace.download = nombre;
 
-  document.body.appendChild(enlace);
-  enlace.click();
-  enlace.remove();
+//   document.body.appendChild(enlace);
+//   enlace.click();
+//   enlace.remove();
 
-  URL.revokeObjectURL(enlace.href);
-}
+//   URL.revokeObjectURL(enlace.href);
+// }
 
 async function descargarDesdeServidor(url, nombre = "video.mp4") {
   const backgroundColor = "#f0f0f0";
