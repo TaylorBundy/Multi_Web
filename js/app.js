@@ -1125,9 +1125,9 @@ function mostrarPreview44(url, titulo = "") {
 
   video.load();
 
-  video.play().catch((error) => {
-    console.log("Autoplay bloqueado:", error);
-  });
+  // video.play().catch((error) => {
+  //   console.log("Autoplay bloqueado:", error);
+  // });
 }
 
 // function mostrarPreviewRedgifs(url, titulo = "") {
