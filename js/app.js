@@ -702,7 +702,11 @@ function mostrarDescarga(url, nombre) {
     boton.innerHTML = `<img id="btnImage" src="imagenes/procesando.avif" /> Procesando...`;
     boton.disabled = true;
     (async () => {
+      // if (url.includes("phncdn.com")) {
+      //   await descargarVideo(url, `${nombre}.mp4`);
+      // } else {
       await descargarDesdeServidor(url, `${nombre}`);
+      //}
     })();
     // if (
     //   url.includes("media.fastdl") ||
