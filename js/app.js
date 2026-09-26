@@ -1107,7 +1107,7 @@ function mostrarPreview44(url, titulo = "") {
 
   video.pause();
 
-  const urlPreview = `/preview?url=${encodeURIComponent(url)}`;
+  const urlPreview = `${API}/preview?url=${encodeURIComponent(url)}`;
 
   video.src = urlPreview;
 
