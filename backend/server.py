@@ -1,6 +1,6 @@
-import os
+import os, requests
 import glob
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, Response
 from flask_cors import CORS
 from yt_dlp import YoutubeDL
 import yt_dlp
@@ -212,6 +212,91 @@ def obtener_enlace_x():
             
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route("/preview")
+def preview_video():
+    url = request.args.get("url")
+
+    if not url:
+        return "Falta la URL del video", 400
+
+    try:
+        # Headers enviados a Redgifs
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/149.0.0.0 Safari/537.36"
+            ),
+            "Accept": "*/*",
+            "Referer": "https://www.redgifs.com/"
+        }
+
+        # El navegador puede pedir solamente una parte del video
+        range_header = request.headers.get("Range")
+
+        if range_header:
+            headers["Range"] = range_header
+
+        # Pedimos el video a Redgifs
+        respuesta = requests.get(
+            url,
+            headers=headers,
+            stream=True,
+            timeout=30
+        )
+
+        # Si Redgifs devuelve error
+        if respuesta.status_code not in (200, 206):
+            return (
+                f"Redgifs respondió con HTTP {respuesta.status_code}",
+                respuesta.status_code
+            )
+
+        # Headers que vamos a devolver al navegador
+        response_headers = {
+            "Content-Type": respuesta.headers.get(
+                "Content-Type",
+                "video/mp4"
+            ),
+            "Accept-Ranges": "bytes",
+        }
+
+        # Estos son importantes para el reproductor
+        for header in [
+            "Content-Length",
+            "Content-Range",
+            "ETag",
+            "Last-Modified"
+        ]:
+            if header in respuesta.headers:
+                response_headers[header] = respuesta.headers[header]
+
+        def generar():
+            try:
+                for chunk in respuesta.iter_content(chunk_size=1024 * 64):
+                    if chunk:
+                        yield chunk
+            finally:
+                respuesta.close()
+
+        return Response(
+            generar(),
+            status=respuesta.status_code,
+            headers=response_headers,
+            direct_passthrough=True
+        )
+
+    except requests.exceptions.Timeout:
+        return "Tiempo de espera agotado al obtener el video", 504
+
+    except requests.exceptions.RequestException as e:
+        print("Error obteniendo video:", e)
+        return "Error obteniendo el video", 502
+
+    except Exception as e:
+        print("Error en /preview:", e)
+        return "Error interno del servidor", 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

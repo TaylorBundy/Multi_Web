@@ -677,7 +677,7 @@ function mostrarDescarga(url, nombre) {
   boton.title = `Click para descargar: ${url}`;
   if (url.includes("media.redgifs.com")) {
     console.log("jaja");
-    mostrarPreviewRedgifs(url, nombre);
+    mostrarPreview44(url, nombre);
   } else {
     mostrarPreview(url, nombre);
   }
@@ -1098,6 +1098,28 @@ function mostrarPreviewRedgifs2(url, titulo = "") {
   video.oncanplay = () => {
     video.play().catch(() => {});
   };
+}
+
+function mostrarPreview44(url, titulo = "") {
+  const preview = document.getElementById("preview");
+  const video = document.getElementById("videoPreview");
+  const info = document.getElementById("videoInfo");
+
+  video.pause();
+
+  const urlPreview = `/preview?url=${encodeURIComponent(url)}`;
+
+  video.src = urlPreview;
+
+  info.textContent = titulo;
+
+  preview.classList.remove("oculto");
+
+  video.load();
+
+  video.play().catch((error) => {
+    console.log("Autoplay bloqueado:", error);
+  });
 }
 
 function mostrarPreviewRedgifs(url, titulo = "") {
