@@ -678,13 +678,13 @@ function mostrarDescarga(url, nombre) {
     `);
   const boton = document.getElementById("btnDescargar");
   boton.title = `Click para descargar: ${url}`;
-  // if (url.includes("media.redgifs.com")) {
-  //   console.log("jaja");
-  //   mostrarPreview44(url, nombre);
-  // } else {
-  //   mostrarPreview(url, nombre);
-  // }
-  mostrarPreview44(url, nombre);
+  if (url.includes("media.redgifs.com")) {
+    console.log("jaja");
+    mostrarPreview44(url, nombre);
+  } else {
+    mostrarPreview(url, nombre);
+  }
+  // mostrarPreview(url, nombre);
   loading.style.display = "none";
   //const boton = document.getElementById("btnDescargar");
 
@@ -1060,29 +1060,29 @@ function mostrarDescarga(url, nombre) {
 //   preview.classList.remove("oculto");
 // }
 
-// function mostrarPreview2(url, titulo = "") {
-//   const preview = document.getElementById("preview");
-//   const video = document.getElementById("videoPreview");
-//   const info = document.getElementById("videoInfo");
+function mostrarPreview(url, titulo = "") {
+  const preview = document.getElementById("preview");
+  const video = document.getElementById("videoPreview");
+  const info = document.getElementById("videoInfo");
 
-//   // Detener cualquier reproducción anterior
-//   video.pause();
+  // Detener cualquier reproducción anterior
+  video.pause();
 
-//   // Cambiar el video
-//   video.src = url;
-//   video.load();
+  // Cambiar el video
+  video.src = url;
+  video.load();
 
-//   // Información
-//   info.textContent = titulo;
+  // Información
+  info.textContent = titulo;
 
-//   // Mostrar preview
-//   preview.classList.remove("oculto");
+  // Mostrar preview
+  preview.classList.remove("oculto");
 
-//   // Reproducir cuando esté listo
-//   video.play().catch((error) => {
-//     console.log("La reproducción automática fue bloqueada:", error);
-//   });
-// }
+  // Reproducir cuando esté listo
+  video.play().catch((error) => {
+    console.log("La reproducción automática fue bloqueada:", error);
+  });
+}
 
 // function mostrarPreviewRedgifs2(url, titulo = "") {
 //   const video = document.getElementById("videoPreview");
