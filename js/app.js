@@ -678,7 +678,7 @@ function mostrarDescarga(url, nombre) {
     `);
   const boton = document.getElementById("btnDescargar");
   boton.title = `Click para descargar: ${url}`;
-  if (url.includes("media.redgifs.com")) {
+  if (url.includes("media.redgifs.com") || url.includes("phncdn.com")) {
     console.log("jaja");
     mostrarPreview44(url, nombre);
   } else {
@@ -1047,20 +1047,20 @@ function mostrarDescarga(url, nombre) {
   // });
 }
 
-// function mostrarPreview(url, titulo = "") {
-//   const preview = document.getElementById("preview");
-//   const video = document.getElementById("videoPreview");
-//   const info = document.getElementById("videoInfo");
-
-//   video.src = url;
-//   video.load();
-
-//   info.textContent = titulo;
-
-//   preview.classList.remove("oculto");
-// }
-
 function mostrarPreview(url, titulo = "") {
+  const preview = document.getElementById("preview");
+  const video = document.getElementById("videoPreview");
+  const info = document.getElementById("videoInfo");
+
+  video.src = url;
+  video.load();
+
+  info.textContent = titulo;
+
+  preview.classList.remove("oculto");
+}
+
+function mostrarPreview2(url, titulo = "") {
   const preview = document.getElementById("preview");
   const video = document.getElementById("videoPreview");
   const info = document.getElementById("videoInfo");
@@ -1198,9 +1198,9 @@ function procesarBusqueda() {
   } else if (url.includes("fbcdn.net")) {
     logo =
       "https://static.xx.fbcdn.net/rsrc.php/yk/r/Czs2nwUnhiR.webp?_nc_eui2=AeHfvJCfzxLi0rkFRf86gHXGQI1bdQxlaeJAjVt1DGVp4oI5KGqHA2QvTGC4CB14v7mfuMOK8dufkfhBqYc1dNlL";
-  } else if (url.includes("downixcdn")) {
+  } else if (url.includes("downixcdn") || url.includes("phncdn.com")) {
     //const nomTemp = url.split("?")[0];
-    //console.log(nombreArchivo.value);
+    console.log(nombreArchivo.value);
     nombreFinal = nombreArchivo.value; //nomTemp.split("/").pop().replace(".mp4", "");
   } else if (url.includes("ssstwitter")) {
     logo =
