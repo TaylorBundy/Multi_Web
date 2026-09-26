@@ -1047,62 +1047,62 @@ function mostrarDescarga(url, nombre) {
   // });
 }
 
-function mostrarPreview(url, titulo = "") {
-  const preview = document.getElementById("preview");
-  const video = document.getElementById("videoPreview");
-  const info = document.getElementById("videoInfo");
+// function mostrarPreview(url, titulo = "") {
+//   const preview = document.getElementById("preview");
+//   const video = document.getElementById("videoPreview");
+//   const info = document.getElementById("videoInfo");
 
-  video.src = url;
-  video.load();
+//   video.src = url;
+//   video.load();
 
-  info.textContent = titulo;
+//   info.textContent = titulo;
 
-  preview.classList.remove("oculto");
-}
+//   preview.classList.remove("oculto");
+// }
 
-function mostrarPreview2(url, titulo = "") {
-  const preview = document.getElementById("preview");
-  const video = document.getElementById("videoPreview");
-  const info = document.getElementById("videoInfo");
+// function mostrarPreview2(url, titulo = "") {
+//   const preview = document.getElementById("preview");
+//   const video = document.getElementById("videoPreview");
+//   const info = document.getElementById("videoInfo");
 
-  // Detener cualquier reproducción anterior
-  video.pause();
+//   // Detener cualquier reproducción anterior
+//   video.pause();
 
-  // Cambiar el video
-  video.src = url;
-  video.load();
+//   // Cambiar el video
+//   video.src = url;
+//   video.load();
 
-  // Información
-  info.textContent = titulo;
+//   // Información
+//   info.textContent = titulo;
 
-  // Mostrar preview
-  preview.classList.remove("oculto");
+//   // Mostrar preview
+//   preview.classList.remove("oculto");
 
-  // Reproducir cuando esté listo
-  video.play().catch((error) => {
-    console.log("La reproducción automática fue bloqueada:", error);
-  });
-}
+//   // Reproducir cuando esté listo
+//   video.play().catch((error) => {
+//     console.log("La reproducción automática fue bloqueada:", error);
+//   });
+// }
 
-function mostrarPreviewRedgifs2(url, titulo = "") {
-  const video = document.getElementById("videoPreview");
-  const info = document.getElementById("videoInfo");
-  const preview = document.getElementById("preview");
+// function mostrarPreviewRedgifs2(url, titulo = "") {
+//   const video = document.getElementById("videoPreview");
+//   const info = document.getElementById("videoInfo");
+//   const preview = document.getElementById("preview");
 
-  video.pause();
-  video.removeAttribute("src");
+//   video.pause();
+//   video.removeAttribute("src");
 
-  video.src = url;
-  info.textContent = titulo;
+//   video.src = url;
+//   info.textContent = titulo;
 
-  preview.classList.remove("oculto");
+//   preview.classList.remove("oculto");
 
-  video.load();
+//   video.load();
 
-  video.oncanplay = () => {
-    video.play().catch(() => {});
-  };
-}
+//   video.oncanplay = () => {
+//     video.play().catch(() => {});
+//   };
+// }
 
 function mostrarPreview44(url, titulo = "") {
   const preview = document.getElementById("preview");
@@ -1126,44 +1126,44 @@ function mostrarPreview44(url, titulo = "") {
   });
 }
 
-function mostrarPreviewRedgifs(url, titulo = "") {
-  const preview = document.getElementById("preview");
-  const video = document.getElementById("videoPreview");
-  const info = document.getElementById("videoInfo");
+// function mostrarPreviewRedgifs(url, titulo = "") {
+//   const preview = document.getElementById("preview");
+//   const video = document.getElementById("videoPreview");
+//   const info = document.getElementById("videoInfo");
 
-  video.pause();
-  video.removeAttribute("src");
+//   video.pause();
+//   video.removeAttribute("src");
 
-  info.textContent = titulo;
-  preview.classList.remove("oculto");
+//   info.textContent = titulo;
+//   preview.classList.remove("oculto");
 
-  video.src = url;
-  video.load();
+//   video.src = url;
+//   video.load();
 
-  video.onloadedmetadata = () => {
-    console.log("Metadata cargada");
-    console.log("Duración:", video.duration);
+//   video.onloadedmetadata = () => {
+//     console.log("Metadata cargada");
+//     console.log("Duración:", video.duration);
 
-    video
-      .play()
-      .then(() => {
-        console.log("Reproduciendo");
-      })
-      .catch((error) => {
-        console.error("Error al reproducir:", error);
-      });
-  };
+//     video
+//       .play()
+//       .then(() => {
+//         console.log("Reproduciendo");
+//       })
+//       .catch((error) => {
+//         console.error("Error al reproducir:", error);
+//       });
+//   };
 
-  video.onerror = () => {
-    console.error("Error del video:");
-    console.error(video.error);
+//   video.onerror = () => {
+//     console.error("Error del video:");
+//     console.error(video.error);
 
-    if (video.error) {
-      console.error("Código:", video.error.code);
-      console.error("Mensaje:", video.error.message);
-    }
-  };
-}
+//     if (video.error) {
+//       console.error("Código:", video.error.code);
+//       console.error("Mensaje:", video.error.message);
+//     }
+//   };
+// }
 
 function guardarVideo(nombre, enlace) {
   const videos = JSON.parse(localStorage.getItem("videos")) || {};
@@ -1173,11 +1173,11 @@ function guardarVideo(nombre, enlace) {
   localStorage.setItem("videos", JSON.stringify(videos));
 }
 
-function obtenerEnlace(nombre) {
-  const videos = JSON.parse(localStorage.getItem("videos")) || {};
+// function obtenerEnlace(nombre) {
+//   const videos = JSON.parse(localStorage.getItem("videos")) || {};
 
-  return videos[nombre] || null;
-}
+//   return videos[nombre] || null;
+// }
 
 //let nombreFinal = "";
 function procesarBusqueda() {
@@ -1199,9 +1199,9 @@ function procesarBusqueda() {
     logo =
       "https://static.xx.fbcdn.net/rsrc.php/yk/r/Czs2nwUnhiR.webp?_nc_eui2=AeHfvJCfzxLi0rkFRf86gHXGQI1bdQxlaeJAjVt1DGVp4oI5KGqHA2QvTGC4CB14v7mfuMOK8dufkfhBqYc1dNlL";
   } else if (url.includes("downixcdn")) {
-    const nomTemp = url.split("?")[0];
-    console.log(nomTemp);
-    nombreFinal = nombreArchivo.textContent; //nomTemp.split("/").pop().replace(".mp4", "");
+    //const nomTemp = url.split("?")[0];
+    //console.log(nombreArchivo.value);
+    nombreFinal = nombreArchivo.value; //nomTemp.split("/").pop().replace(".mp4", "");
   } else if (url.includes("ssstwitter")) {
     logo =
       "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
@@ -1280,6 +1280,7 @@ function procesarBusqueda() {
       url.includes("xhcdn")
     ) {
       texto = await navigator.clipboard.readText();
+      //console.log(texto);
       nombre = texto.split(".-.")[1];
       nombreFinal = nombre;
     }
@@ -1297,7 +1298,7 @@ function procesarBusqueda() {
     // console.log(datos);
     console.log("Nombre final:", nombreFinal);
     if (nombreFinal == null) {
-      nombreFinal = nombreArchivo.textContent;
+      nombreFinal = nombreArchivo.value;
     }
 
     mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
