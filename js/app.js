@@ -2,6 +2,7 @@ const loading = document.querySelector(".tenor-gif-embed");
 const API = "https://multi-web-uf1z.onrender.com";
 const nombreArchivo = document.querySelector("#nombre");
 let tamano = null;
+let directUrl;
 // async function descargarVideo(url, nombre = "video.mp4") {
 //   console.log("URL:", url);
 //   // Modal
@@ -681,6 +682,8 @@ function mostrarDescarga(url, nombre) {
   if (url.includes("media.redgifs.com") || url.includes("phncdn.com")) {
     console.log("jaja");
     mostrarPreview44(url, nombre);
+  } else if (url.includes("instagram.com/reel")) {
+    mostrarPreview44(directUrl, nombre);
   } else {
     mostrarPreview(url, nombre);
   }
@@ -1278,6 +1281,10 @@ function procesarBusqueda() {
     console.log(datos2);
     if (url.includes("ssstwitter")) {
       nombreFinal = datos2.title || "video";
+    } else if (url.includes("instagram.com/reel")) {
+      directUrl = datos2.direct_url;
+      nombreFinal = datos2.todo.description || datos2.todo.id;
+      //url = directUrl;
     } else if (
       url.includes("xhmediacdn") ||
       url.includes("xhpingcdn") ||
