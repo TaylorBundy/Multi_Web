@@ -1200,7 +1200,10 @@ function procesarBusqueda() {
     logo = "https://www.twpornstars.com/favicon.ico";
     const nomTemp = url.split("?")[0];
     nombreFinal = nomTemp.split("/").pop().replace(".mp4", "");
-  } else if (url.includes("media.fastdl")) {
+  } else if (
+    url.includes("media.fastdl") ||
+    url.includes("instagram.com/reel")
+  ) {
     logo = "https://static.cdninstagram.com/rsrc.php/yr/r/rzWiSjZRxk5.webp";
   } else if (url.includes("fbcdn.net")) {
     logo =
