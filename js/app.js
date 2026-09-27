@@ -3,6 +3,7 @@ const API = "https://multi-web-uf1z.onrender.com";
 const nombreArchivo = document.querySelector("#nombre");
 let tamano = null;
 let directUrl;
+let sitio;
 // async function descargarVideo(url, nombre = "video.mp4") {
 //   console.log("URL:", url);
 //   // Modal
@@ -270,6 +271,595 @@ let directUrl;
 
 //   URL.revokeObjectURL(enlace.href);
 // }
+
+function obtenerNombreConExtension(url) {
+  try {
+    const urlObj = new URL(url);
+
+    // Obtener el último segmento del path
+    let nombre = urlObj.pathname.split("/").pop();
+
+    // Si ya tiene extensión
+    if (/\.[a-z0-9]+$/i.test(nombre)) {
+      return nombre;
+    }
+
+    // Buscar extensión en parámetros
+    const format = urlObj.searchParams.get("format");
+
+    if (format) {
+      return `${nombre}.${format}`;
+    }
+
+    // Si no se pudo determinar
+    return nombre || "imagen";
+  } catch (error) {
+    console.error("URL inválida:", error);
+    return "imagen";
+  }
+}
+
+async function descargarImagen(url, nombre = "imagen") {
+  console.log("URL:", url);
+
+  // ========================================
+  // Modal
+  // ========================================
+
+  const modal = document.createElement("div");
+
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    font-family: Arial, sans-serif;
+  `;
+
+  const contenido = document.createElement("div");
+
+  contenido.style.cssText = `
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 370px;
+    max-width: 90vw;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,.3);
+    color: black;
+  `;
+
+  // ========================================
+  // Preview
+  // ========================================
+
+  const previewContainer = document.createElement("div");
+
+  previewContainer.style.cssText = `
+    width: 100%;
+    min-height: 120px;
+    max-height: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${backgroundColor};
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+  `;
+
+  const preview = document.createElement("img");
+
+  preview.src = url;
+
+  preview.style.cssText = `
+    max-width: 100%;
+    max-height: 330px;
+    object-fit: contain;
+    display: block;
+  `;
+
+  previewContainer.appendChild(preview);
+
+  // ========================================
+  // Título
+  // ========================================
+
+  const titulo = document.createElement("div");
+
+  titulo.style.cssText = `
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    word-break: break-word;
+  `;
+
+  titulo.textContent = nombre;
+
+  // ========================================
+  // Estado
+  // ========================================
+
+  const estado = document.createElement("div");
+
+  estado.style.cssText = `
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 15px;
+  `;
+
+  estado.textContent = "Vista previa";
+
+  // ========================================
+  // Botón descargar
+  // ========================================
+
+  const botonDescargar = document.createElement("button");
+
+  botonDescargar.textContent = "📥 Descargar";
+
+  botonDescargar.style.cssText = `
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #4caf50;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 8px;
+  `;
+
+  // ========================================
+  // Botón cerrar
+  // ========================================
+
+  const botonCerrar = document.createElement("button");
+
+  botonCerrar.textContent = "Cancelar";
+
+  botonCerrar.style.cssText = `
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #e53935;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+  `;
+
+  // ========================================
+  // Agregar
+  // ========================================
+
+  contenido.append(
+    previewContainer,
+    titulo,
+    estado,
+    botonDescargar,
+    botonCerrar,
+  );
+
+  modal.appendChild(contenido);
+
+  document.body.appendChild(modal);
+
+  // ========================================
+  // Verificar que la imagen cargó
+  // ========================================
+
+  preview.onload = () => {
+    estado.textContent = "Vista previa lista";
+  };
+
+  preview.onerror = () => {
+    estado.textContent = "❌ No se pudo cargar la imagen";
+
+    botonDescargar.disabled = true;
+
+    botonDescargar.style.opacity = "0.5";
+    botonDescargar.style.cursor = "default";
+  };
+
+  // ========================================
+  // Cerrar
+  // ========================================
+
+  botonCerrar.onclick = () => {
+    modal.remove();
+  };
+
+  // ========================================
+  // Descargar
+  // ========================================
+
+  botonDescargar.onclick = async () => {
+    botonDescargar.disabled = true;
+
+    botonDescargar.style.opacity = "0.6";
+
+    estado.textContent = "📥 Descargando...";
+
+    try {
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      const blob = await res.blob();
+
+      // ====================================
+      // Detectar extensión
+      // ====================================
+
+      if (!/\.[a-z0-9]+$/i.test(nombre)) {
+        const extensiones = {
+          "image/jpeg": ".jpg",
+          "image/png": ".png",
+          "image/webp": ".webp",
+          "image/gif": ".gif",
+          "image/avif": ".avif",
+          "image/bmp": ".bmp",
+          "image/svg+xml": ".svg",
+        };
+
+        nombre += extensiones[blob.type] || ".jpg";
+      }
+
+      // ====================================
+      // Crear descarga
+      // ====================================
+
+      const blobUrl = URL.createObjectURL(blob);
+
+      const enlace = document.createElement("a");
+
+      enlace.href = blobUrl;
+
+      enlace.download = nombre;
+
+      document.body.appendChild(enlace);
+
+      enlace.click();
+
+      enlace.remove();
+
+      URL.revokeObjectURL(blobUrl);
+
+      estado.textContent = "✅ Descarga completada";
+
+      botonDescargar.remove();
+
+      setTimeout(() => {
+        modal.remove();
+      }, 1200);
+    } catch (error) {
+      console.error("Error descargando imagen:", error);
+
+      estado.textContent = "❌ No se pudo descargar la imagen";
+
+      botonDescargar.disabled = false;
+
+      botonDescargar.style.opacity = "1";
+    }
+  };
+}
+
+async function descargarImagen2(url, nombre = "imagen") {
+  console.log("URL:", url);
+
+  // =========================
+  // Modal
+  // =========================
+
+  const modal = document.createElement("div");
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    font-family: Arial, sans-serif;
+  `;
+
+  const contenido = document.createElement("div");
+  contenido.style.cssText = `
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 370px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,.3);
+    color: black;
+  `;
+
+  // Logo
+  const imagenContainer = document.createElement("div");
+  imagenContainer.style.cssText = `
+    position: relative;
+    display: flex;
+    justify-content: center;
+    background-color: ${backgroundColor};
+    border-radius: 12px;
+    padding: 5px;
+    margin-bottom: 15px;
+  `;
+
+  const imagen = document.createElement("img");
+  imagen.src = logo;
+  imagen.style.cssText = `
+    max-width: 100%;
+    max-height: 80px;
+    object-fit: contain;
+  `;
+
+  imagenContainer.appendChild(imagen);
+
+  // Título
+  const titulo = document.createElement("div");
+  titulo.style.cssText = `
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    word-break: break-word;
+  `;
+
+  titulo.textContent = `📥 Descargando: ${nombre}`;
+
+  // Porcentaje
+  const porcentajeTexto = document.createElement("div");
+  porcentajeTexto.style.cssText = `
+    font-size: 20px;
+    margin-bottom: 10px;
+  `;
+
+  porcentajeTexto.textContent = "0%";
+
+  // Barra
+  const barra = document.createElement("div");
+  barra.style.cssText = `
+    width: 100%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  `;
+
+  const progreso = document.createElement("div");
+  progreso.style.cssText = `
+    width: 0%;
+    height: 100%;
+    background: #4caf50;
+    transition: width .2s;
+  `;
+
+  barra.appendChild(progreso);
+
+  // Detalle
+  const detalle = document.createElement("div");
+  detalle.style.cssText = `
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
+  `;
+
+  // Velocidad
+  const velocidadTexto = document.createElement("div");
+  velocidadTexto.style.cssText = `
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+  `;
+
+  velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+  contenido.append(
+    imagenContainer,
+    titulo,
+    porcentajeTexto,
+    barra,
+    detalle,
+    velocidadTexto,
+  );
+
+  modal.appendChild(contenido);
+  document.body.appendChild(modal);
+
+  try {
+    // =========================
+    // Descargar
+    // =========================
+
+    const res = await fetch(url, {
+      credentials: "include",
+    });
+
+    console.log("Status:", res.status);
+    console.log("Content-Length:", res.headers.get("content-length"));
+    console.log("Content-Type:", res.headers.get("content-type"));
+
+    if (!res.ok) {
+      throw new Error(`Error ${res.status}`);
+    }
+
+    const total = Number(res.headers.get("content-length"));
+
+    if (!total) {
+      porcentajeTexto.textContent = "Descargando...";
+      detalle.textContent = "No se puede calcular el progreso.";
+    }
+
+    const reader = res.body.getReader();
+
+    const chunks = [];
+
+    let descargado = 0;
+
+    // =========================
+    // Velocidad
+    // =========================
+
+    let ultimoTiempo = performance.now();
+    let ultimoDescargado = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) break;
+
+      chunks.push(value);
+
+      descargado += value.length;
+
+      // =========================
+      // Calcular velocidad
+      // =========================
+
+      const ahora = performance.now();
+
+      const tiempo = (ahora - ultimoTiempo) / 1000;
+
+      if (tiempo >= 0.5) {
+        const bytesIntervalo = descargado - ultimoDescargado;
+
+        const velocidad = bytesIntervalo / tiempo;
+
+        let textoVelocidad;
+
+        if (velocidad >= 1024 * 1024) {
+          textoVelocidad = `${(velocidad / 1024 / 1024).toFixed(2)} MB/s`;
+        } else if (velocidad >= 1024) {
+          textoVelocidad = `${(velocidad / 1024).toFixed(2)} KB/s`;
+        } else {
+          textoVelocidad = `${velocidad.toFixed(0)} B/s`;
+        }
+
+        velocidadTexto.textContent = `Velocidad: ${textoVelocidad}`;
+
+        ultimoTiempo = ahora;
+        ultimoDescargado = descargado;
+
+        // =========================
+        // ETA
+        // =========================
+
+        if (total && velocidad > 0) {
+          const restante = total - descargado;
+
+          const segundos = restante / velocidad;
+
+          let eta;
+
+          if (segundos >= 3600) {
+            eta =
+              `${Math.floor(segundos / 3600)}h ` +
+              `${Math.floor((segundos % 3600) / 60)}m`;
+          } else if (segundos >= 60) {
+            eta =
+              `${Math.floor(segundos / 60)}m ` +
+              `${Math.floor(segundos % 60)}s`;
+          } else {
+            eta = `${Math.ceil(segundos)} s`;
+          }
+
+          detalle.textContent =
+            `${(descargado / 1024 / 1024).toFixed(2)} MB / ` +
+            `${(total / 1024 / 1024).toFixed(2)} MB • ` +
+            `ETA: ${eta}`;
+        }
+      }
+
+      // =========================
+      // Progreso
+      // =========================
+
+      if (total) {
+        const porcentaje = ((descargado / total) * 100).toFixed(1);
+
+        porcentajeTexto.textContent = `${porcentaje}%`;
+
+        progreso.style.width = `${porcentaje}%`;
+      }
+    }
+
+    // =========================
+    // Crear imagen
+    // =========================
+
+    const blob = new Blob(chunks, {
+      type: res.headers.get("content-type") || "image/*",
+    });
+
+    // =========================
+    // Determinar extensión
+    // =========================
+
+    if (!/\.[a-z0-9]+$/i.test(nombre)) {
+      const tipo = blob.type;
+
+      const extensiones = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+        "image/gif": ".gif",
+        "image/avif": ".avif",
+        "image/bmp": ".bmp",
+        "image/svg+xml": ".svg",
+      };
+
+      nombre += extensiones[tipo] || ".jpg";
+    }
+
+    // =========================
+    // Descargar
+    // =========================
+
+    const blobUrl = URL.createObjectURL(blob);
+
+    const enlace = document.createElement("a");
+
+    enlace.href = blobUrl;
+    enlace.download = nombre;
+
+    document.body.appendChild(enlace);
+
+    enlace.click();
+
+    enlace.remove();
+
+    URL.revokeObjectURL(blobUrl);
+
+    // =========================
+    // Finalizado
+    // =========================
+
+    porcentajeTexto.textContent = "100%";
+
+    progreso.style.width = "100%";
+
+    detalle.textContent = "Descarga completada";
+
+    velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+    setTimeout(() => {
+      modal.remove();
+    }, 1000);
+  } catch (error) {
+    modal.remove();
+
+    console.error("Error descargando imagen:", error);
+
+    throw error;
+  }
+}
 
 async function descargarDesdeServidor(url, nombre = "video.mp4") {
   const backgroundColor = "#f0f0f0";
@@ -651,6 +1241,7 @@ async function descargarDesdeServidor(url, nombre = "video.mp4") {
 }
 
 function mostrarDescarga(url, nombre) {
+  console.log(sitio);
   let linkkk;
   if (url.includes("redgifs.com")) {
     logo = "https://www.redgifs.com/static/logo-full-red-C9X7m0yF.svg";
@@ -672,6 +1263,15 @@ function mostrarDescarga(url, nombre) {
       "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
     tamano = "30px";
   }
+  if (sitio === "imagen") {
+    if (
+      url.includes("fapello.com") ||
+      url.includes("pbs.twimg.com") ||
+      url.includes("pornpics.com")
+    ) {
+      nombre = obtenerNombreConExtension(url.replace(".mp4", ""));
+    }
+  }
   mostrarResultado(`
         <div class="card">
             <h2>${nombre}</h2>
@@ -690,7 +1290,11 @@ function mostrarDescarga(url, nombre) {
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
   } else {
-    mostrarPreview(url, nombre);
+    if (sitio === "imagen") {
+      mostrarPreview(url, sitio, nombre);
+    } else {
+      mostrarPreview(url, nombre);
+    }
   }
   // mostrarPreview(url, nombre);
   loading.style.display = "none";
@@ -713,7 +1317,11 @@ function mostrarDescarga(url, nombre) {
       // if (url.includes("phncdn.com")) {
       //   await descargarVideo(url, `${nombre}.mp4`);
       // } else {
-      await descargarDesdeServidor(url, `${nombre}`);
+      if (sitio === "imagen") {
+        await descargarImagen(url, `${nombre}`);
+      } else {
+        await descargarDesdeServidor(url, `${nombre}`);
+      }
       //}
     })();
     // if (
@@ -1059,7 +1667,7 @@ function mostrarDescarga(url, nombre) {
   // });
 }
 
-function mostrarPreview(url, titulo = "") {
+function mostrarPreviewX(url, titulo = "") {
   const preview = document.getElementById("preview");
   const video = document.getElementById("videoPreview");
   const info = document.getElementById("videoInfo");
@@ -1070,6 +1678,64 @@ function mostrarPreview(url, titulo = "") {
   info.textContent = titulo;
 
   preview.classList.remove("oculto");
+}
+function mostrarPreview(url, tipo, info = "") {
+  const preview = document.getElementById("preview");
+  const video = document.getElementById("videoPreview");
+  const videoInfo = document.getElementById("videoInfo");
+
+  preview.classList.remove("oculto");
+
+  // Limpiar preview anterior
+  if (!sitio === "imagen") {
+    video.style.display = "none";
+    video.pause();
+    video.removeAttribute("src");
+  }
+
+  // Eliminar imagen anterior si existe
+  const imagenAnterior = document.getElementById("imagenPreview");
+
+  if (imagenAnterior) {
+    imagenAnterior.remove();
+  }
+
+  // =========================
+  // IMAGEN
+  // =========================
+
+  if (tipo.startsWith("image/")) {
+    const imagen = document.createElement("img");
+
+    imagen.id = "imagenPreview";
+    imagen.src = url;
+    imagen.alt = "Vista previa";
+
+    imagen.style.cssText = `
+      display: block;
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      border-radius: 8px;
+    `;
+
+    preview.insertBefore(imagen, video);
+  }
+
+  // =========================
+  // VIDEO
+  // =========================
+  else if (tipo.startsWith("video/")) {
+    video.style.display = "block";
+    video.src = url;
+    video.load();
+  }
+
+  // =========================
+  // INFORMACIÓN
+  // =========================
+
+  videoInfo.textContent = info;
 }
 
 function mostrarPreview2(url, titulo = "") {
@@ -1264,7 +1930,7 @@ function procesarBusqueda() {
     return;
   }
 
-  const sitio = detectarSitio(url);
+  sitio = detectarSitio(url);
 
   if (!sitio) {
     alerta("Sitio no soportado");
@@ -1303,6 +1969,17 @@ function procesarBusqueda() {
       nombre = texto.split(".-.")[1];
       nombreFinal = nombre;
     }
+    if (sitio === "imagen") {
+      if (
+        url.includes("fapello.com") ||
+        url.includes("pbs.twimg.com") ||
+        url.includes("pornpics.com")
+      ) {
+        nombre = obtenerNombreConExtension(url);
+        nombreFinal = nombre;
+        cambiarPreview("imagen", url);
+      }
+    }
 
     // video.src = datos.formats[0].url;
     // const respuesta = await fetch(`${API}/buscar`, {
@@ -1322,6 +1999,42 @@ function procesarBusqueda() {
 
     mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
   })();
+
+  function cambiarPreview(tipo, url) {
+    const video = document.getElementById("videoPreview");
+
+    if (tipo === "imagen") {
+      const imagen = document.createElement("img");
+
+      imagen.id = "videoPreview";
+      imagen.src = url;
+      imagen.alt = "Vista previa";
+
+      imagen.style.cssText = `
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      border-radius: 8px;
+    `;
+
+      video.replaceWith(imagen);
+    } else {
+      const nuevoVideo = document.createElement("video");
+
+      nuevoVideo.id = "videoPreview";
+      nuevoVideo.controls = true;
+      nuevoVideo.playsInline = true;
+      nuevoVideo.preload = "metadata";
+      nuevoVideo.src = url;
+
+      nuevoVideo.style.cssText = `
+      width: 100%;
+      max-height: 500px;
+    `;
+
+      video.replaceWith(nuevoVideo);
+    }
+  }
 
   //   mostrarResultado(`
   //         <div class="card">

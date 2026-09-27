@@ -38,6 +38,13 @@ function detectarSitio(url) {
 
   if (url.includes("downixcdn.com")) return "PornHub";
 
+  if (
+    url.includes("fapello.com") ||
+    url.includes("pbs.twimg.com/media") ||
+    url.includes("pornpics.com")
+  )
+    return "imagen";
+
   if (url.includes("video.twimg.com")) return "Twpornstars";
 
   if (url.includes("tiktok")) return "tiktok";
