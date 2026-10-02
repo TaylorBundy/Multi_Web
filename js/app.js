@@ -1500,7 +1500,9 @@ function mostrarDescarga(url, nombre) {
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
   } else if (url.includes("el2.phncdn.com")) {
-    mostrarPreview(url, sitio, nombre);
+    mostrarPreview2(url, nombre);
+  } else if (url.includes("downixcdn")) {
+    mostrarPreview2(url, nombre);
   } else {
     if (sitio === "imagen") {
       mostrarPreview(url, sitio, nombre);
@@ -1532,8 +1534,8 @@ function mostrarDescarga(url, nombre) {
       if (sitio === "imagen") {
         await descargarImagen(url, `${nombre}`);
       } else {
-        if (url.includes("el2.phncdn.com")) {
-          await descargarVideoNuevo(url, `${nombre}`);
+        if (url.includes("el2.phncdn.com") || url.includes("downixcdn")) {
+          await descargarVideoNuevo(url, `${nombre}.mp4`);
         } else {
           await descargarDesdeServidor(url, `${nombre}`);
         }
