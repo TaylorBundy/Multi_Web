@@ -9,16 +9,14 @@ app = Flask(__name__)
 CORS(app)  # Permite que tu HTML se conecte desde otro origen si es necesario
 
 # Crear directorio temporal si no existe
-TEMP_DIR = os.path.join(os.getcwd(), 'descargas_temp')
+TEMP_DIR = os.path.join(os.getcwd(), "descargas_temp")
 os.makedirs(TEMP_DIR, exist_ok=True)
+
 
 def obtener_metadata(url: str):
     # Aquí iría la lógica para obtener metadatos
-    return {
-        "url": url,
-        "titulo": "Ejemplo",
-        "descripcion": "Descripción de ejemplo"
-    }
+    return {"url": url, "titulo": "Ejemplo", "descripcion": "Descripción de ejemplo"}
+
 
 def obtener_metadatos(url: str) -> dict:
     """
@@ -33,7 +31,8 @@ def obtener_metadatos(url: str) -> dict:
 
     with YoutubeDL(ydl_opts) as ydl:
         return ydl.extract_info(url, download=False)
-    
+
+
 # @app.route('/descargar', methods=['POST'])
 # def descargar_video():
 #     data = request.json
@@ -45,7 +44,7 @@ def obtener_metadatos(url: str) -> dict:
 #     # Configuración para descargar físicamente el video en el servidor
 #     # % (id)s previene problemas con caracteres raros en el nombre del archivo
 #     outtmpl_path = os.path.join(TEMP_DIR, '%(title)s_%(id)s.%(ext)s')
-    
+
 #     ydl_opts = {
 #         'format': 'best[ext=mp4]/best',  # Busca el mejor MP4 listo
 #         'outtmpl': outtmpl_path,
@@ -55,13 +54,13 @@ def obtener_metadatos(url: str) -> dict:
 #     try:
 #         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 #             # 1. Extraer metadata primero para obtener el título limpio
-#             info = ydl.extract_info(url_video, download=True) 
+#             info = ydl.extract_info(url_video, download=True)
 #             filename_actual = ydl.prepare_filename(info)
 #             titulo_limpio = info.get('title', 'video')
 
 #         # 2. Verificar que el archivo realmente exista en el servidor
 #         if os.path.exists(filename_actual):
-            
+
 #             # Función generadora para borrar el archivo DESPUÉS de que termine de enviarse
 #             def cargar_y_eliminar():
 #                 with open(filename_actual, 'rb') as f:
@@ -77,60 +76,51 @@ def obtener_metadatos(url: str) -> dict:
 #             return response
 #         else:
 #             return jsonify({'error': 'El archivo no pudo ser creado en el servidor'}), 500
-            
+
 #     except Exception as e:
 #         return jsonify({'error': str(e)}), 500
 
-@app.route('/descargar', methods=['POST'])
+
+@app.route("/descargar", methods=["POST"])
 def descargar_video():
     data = request.get_json(silent=True) or {}
-    url_video = data.get('url')
+    url_video = data.get("url")
 
     if not url_video:
-        return jsonify({
-            'error': 'No se proporcionó una URL'
-        }), 400
+        return jsonify({"error": "No se proporcionó una URL"}), 400
 
-    outtmpl_path = os.path.join(
-        TEMP_DIR,
-        '%(title)s_%(id)s.%(ext)s'
-    )
+    outtmpl_path = os.path.join(TEMP_DIR, "%(title)s_%(id)s.%(ext)s")
 
     ydl_opts = {
-        'format': 'best[ext=mp4]/best',
-        'outtmpl': outtmpl_path,
-        'quiet': True,
-        'no_warnings': True
+        "format": "best[ext=mp4]/best",
+        "outtmpl": outtmpl_path,
+        "quiet": True,
+        "no_warnings": True,
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 
-            info = ydl.extract_info(
-                url_video,
-                download=True
-            )
+            info = ydl.extract_info(url_video, download=True)
 
             filename_actual = ydl.prepare_filename(info)
 
-            titulo_limpio = info.get(
-                'title',
-                'video'
-            )
+            titulo_limpio = info.get("title", "video")
 
         if not os.path.exists(filename_actual):
-            return jsonify({
-                'error': 'El archivo no pudo ser creado en el servidor'
-            }), 500
+            return (
+                jsonify({"error": "El archivo no pudo ser creado en el servidor"}),
+                500,
+            )
 
         print("Archivo generado:", filename_actual)
         print("Tamaño:", os.path.getsize(filename_actual))
 
         response = send_file(
             filename_actual,
-            mimetype='video/mp4',
+            mimetype="video/mp4",
             as_attachment=True,
-            download_name=f"{titulo_limpio}.mp4"
+            download_name=f"{titulo_limpio}.mp4",
         )
 
         @response.call_on_close
@@ -147,9 +137,73 @@ def descargar_video():
     except Exception as e:
         print("ERROR /descargar:", e)
 
-        return jsonify({
-            'error': str(e)
-        }), 500
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/descargarApp", methods=["POST", "GET"])
+def descargar_video_App():
+    if request.method == "GET":
+        url_video = request.args.get("url")
+    else:
+        data = request.get_json(silent=True) or {}
+        url_video = data.get("url")
+
+    if not url_video:
+        return jsonify({"error": "No se proporcionó una URL"}), 400
+
+    outtmpl_path = os.path.join(TEMP_DIR, "%(title)s_%(id)s.%(ext)s")
+
+    ydl_opts = {
+        "format": "best[ext=mp4]/best",
+        "outtmpl": outtmpl_path,
+        "quiet": True,
+        "no_warnings": True,
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+
+            info = ydl.extract_info(url_video, download=True)
+
+            filename_actual = ydl.prepare_filename(info)
+
+            titulo_limpio = info.get("title", "video")
+
+        if not os.path.exists(filename_actual):
+            return (
+                jsonify({"error": "El archivo no pudo ser creado en el servidor"}),
+                500,
+            )
+
+        print("Archivo generado:", filename_actual)
+        print("Tamaño:", os.path.getsize(filename_actual))
+
+        response = send_file(
+            filename_actual,
+            mimetype="video/mp4",
+            as_attachment=True,
+            download_name=f"{titulo_limpio}.mp4",
+        )
+
+        # Asegurar que el cliente pueda conocer el tamaño total.
+        response.headers["Content-Length"] = str(os.path.getsize(filename_actual))
+
+        @response.call_on_close
+        def eliminar_temporal():
+            try:
+                if os.path.exists(filename_actual):
+                    os.remove(filename_actual)
+                    print("Archivo temporal eliminado:", filename_actual)
+            except Exception as e:
+                print("Error al eliminar archivo:", e)
+
+        return response
+
+    except Exception as e:
+        print("ERROR /descargar:", e)
+
+        return jsonify({"error": str(e)}), 500
+
 
 @app.post("/buscar")
 def buscar():
@@ -165,24 +219,21 @@ def buscar():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/obtener-enlace', methods=['POST'])
+
+@app.route("/obtener-enlace", methods=["POST"])
 def obtener_enlace_x():
     data = request.json
-    url_video = data.get('url') # Aquí irá tu URL de X
+    url_video = data.get("url")  # Aquí irá tu URL de X
 
     if not url_video:
-        return jsonify({'error': 'No se proporcionó una URL'}), 400
+        return jsonify({"error": "No se proporcionó una URL"}), 400
 
     # Configuración óptima para extraer enlaces de X (Twitter)
     ydl_opts = {
-        'format': 'bestvideo+bestaudio/best', # Fuerza la mejor combinación
-        'quiet': True,
-        'no_warnings': True,
-        'extractor_args': {
-        'twitter': {
-            'api': ['syndication']
-        }
-    }
+        "format": "bestvideo+bestaudio/best",  # Fuerza la mejor combinación
+        "quiet": True,
+        "no_warnings": True,
+        "extractor_args": {"twitter": {"api": ["syndication"]}},
     }
 
     try:
@@ -190,28 +241,40 @@ def obtener_enlace_x():
             # Extrae la metadata sin descargar el archivo físico en el servidor
             info = ydl.extract_info(url_video, download=False)
             print(f"Información extraída: {info}")  # Para depuración
-            
-            # En plataformas como X, el enlace directo puede venir dentro de 'url' 
+
+            # En plataformas como X, el enlace directo puede venir dentro de 'url'
             # o en el primer elemento de la lista de formatos disponibles
-            url_directa = info.get('url')
-            if not url_directa and 'formats' in info:
+            url_directa = info.get("url")
+            if not url_directa and "formats" in info:
                 # Filtrar el formato con mejor resolución que tenga URL directa
-                formatos_validos = [f for f in info['formats'] if f.get('url')]
+                formatos_validos = [f for f in info["formats"] if f.get("url")]
                 if formatos_validos:
-                    url_directa = formatos_validos[-1]['url'] # El último suele ser el de mejor calidad
+                    url_directa = formatos_validos[-1][
+                        "url"
+                    ]  # El último suele ser el de mejor calidad
 
             if url_directa:
-                return jsonify({
-                    'success': True,
-                    'todo': info,  # Devuelve toda la información extraída para depuración
-                    'title': info.get('title', 'video_x'),
-                    'direct_url': url_directa
-                })
+                return jsonify(
+                    {
+                        "success": True,
+                        "todo": info,  # Devuelve toda la información extraída para depuración
+                        "title": info.get("title", "video_x"),
+                        "direct_url": url_directa,
+                    }
+                )
             else:
-                return jsonify({'error': 'No se pudo encontrar un enlace directo para este video'}), 404
-            
+                return (
+                    jsonify(
+                        {
+                            "error": "No se pudo encontrar un enlace directo para este video"
+                        }
+                    ),
+                    404,
+                )
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/preview")
 def preview_video():
@@ -229,7 +292,7 @@ def preview_video():
                 "Chrome/149.0.0.0 Safari/537.36"
             ),
             "Accept": "*/*",
-            "Referer": "https://www.redgifs.com/"
+            "Referer": "https://www.redgifs.com/",
         }
 
         # El navegador puede pedir solamente una parte del video
@@ -239,36 +302,23 @@ def preview_video():
             headers["Range"] = range_header
 
         # Pedimos el video a Redgifs
-        respuesta = requests.get(
-            url,
-            headers=headers,
-            stream=True,
-            timeout=30
-        )
+        respuesta = requests.get(url, headers=headers, stream=True, timeout=30)
 
         # Si Redgifs devuelve error
         if respuesta.status_code not in (200, 206):
             return (
                 f"Redgifs respondió con HTTP {respuesta.status_code}",
-                respuesta.status_code
+                respuesta.status_code,
             )
 
         # Headers que vamos a devolver al navegador
         response_headers = {
-            "Content-Type": respuesta.headers.get(
-                "Content-Type",
-                "video/mp4"
-            ),
+            "Content-Type": respuesta.headers.get("Content-Type", "video/mp4"),
             "Accept-Ranges": "bytes",
         }
 
         # Estos son importantes para el reproductor
-        for header in [
-            "Content-Length",
-            "Content-Range",
-            "ETag",
-            "Last-Modified"
-        ]:
+        for header in ["Content-Length", "Content-Range", "ETag", "Last-Modified"]:
             if header in respuesta.headers:
                 response_headers[header] = respuesta.headers[header]
 
@@ -284,7 +334,7 @@ def preview_video():
             generar(),
             status=respuesta.status_code,
             headers=response_headers,
-            direct_passthrough=True
+            direct_passthrough=True,
         )
 
     except requests.exceptions.Timeout:
@@ -297,6 +347,7 @@ def preview_video():
     except Exception as e:
         print("Error en /preview:", e)
         return "Error interno del servidor", 500
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
