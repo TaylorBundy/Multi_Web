@@ -1493,17 +1493,15 @@ function mostrarDescarga(url, nombre) {
   if (
     url.includes("media.redgifs.com") ||
     url.includes("kl.phncdn.com") ||
-    //url.includes("porn4fans.com/get_file") ||
     url.includes("ssstwitter")
   ) {
     console.log("jaja");
     mostrarPreview44(url, nombre);
+  } else if (url.includes("porn4fans.com/get_file")) {
+    mostrarPreviewtte(url, nombre);
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
-  } else if (
-    url.includes("el2.phncdn.com") ||
-    url.includes("porn4fans.com/get_file")
-  ) {
+  } else if (url.includes("el2.phncdn.com")) {
     mostrarPreview2(url, nombre);
   } else if (url.includes("downixcdn")) {
     mostrarPreview2(url, nombre);
@@ -1900,6 +1898,23 @@ function mostrarPreviewX(url, titulo = "") {
   info.textContent = titulo;
 
   preview.classList.remove("oculto");
+}
+function mostrarPreviewtte(url, titulo = "") {
+  const preview = document.getElementById("preview");
+  const video = document.getElementById("videoPreview");
+  const info = document.getElementById("videoInfo");
+
+  video.pause();
+
+  video.removeAttribute("src");
+  video.load();
+
+  video.src = url;
+
+  info.textContent = titulo;
+  preview.classList.remove("oculto");
+
+  video.load();
 }
 function mostrarPreview(url, tipo, info = "") {
   const preview = document.getElementById("preview");
