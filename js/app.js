@@ -1536,7 +1536,7 @@ function mostrarDescarga(url, nombre) {
       if (sitio === "imagen") {
         await descargarImagen(url, `${nombre}`);
       } else {
-        if (url.includes("el2.phncdn.com") || url.includes("downixcdn")) {
+        if (url.includes("el2.phncdn.com") || url.includes("downixcdn") || url.includes("porn4fans.com/get_file")) {
           await descargarVideoNuevo(url, `${nombre}.mp4`);
         } else {
           await descargarDesdeServidor(url, `${nombre}`);
