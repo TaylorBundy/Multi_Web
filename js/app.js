@@ -1498,7 +1498,7 @@ function mostrarDescarga(url, nombre) {
     console.log("jaja");
     mostrarPreview44(url, nombre);
   } else if (url.includes("porn4fans.com/get_file")) {
-    mostrarPreviewtte(url, nombre);
+    mostrarPreviewNuevo(url, nombre);
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
   } else if (url.includes("el2.phncdn.com")) {
@@ -1999,6 +1999,32 @@ function mostrarPreview2(url, titulo = "") {
   });
 }
 
+function mostrarPreviewNuevo(url, titulo = "") {
+  const preview = document.getElementById("preview");
+  const video = document.getElementById("videoPreview");
+  const info = document.getElementById("videoInfo");
+
+  video.pause();
+
+  video.removeAttribute("src");
+  video.load();
+
+  info.textContent = titulo;
+
+  preview.classList.remove("oculto");
+
+  video.src = url;
+  video.load();
+
+  video.play().catch((error) => {
+    console.log("Reproducción automática bloqueada:", error);
+  });
+
+  video.onerror = () => {
+    console.error("No se pudo reproducir:", video.error);
+  };
+}
+
 // function mostrarPreviewRedgifs2(url, titulo = "") {
 //   const video = document.getElementById("videoPreview");
 //   const info = document.getElementById("videoInfo");
@@ -2094,6 +2120,10 @@ function guardarVideo(nombre, enlace) {
 //   return videos[nombre] || null;
 // }
 
+function esVideoDirecto(url) {
+  return /\.mp4(?:\/)?(?:\?|$)/i.test(url);
+}
+
 //let nombreFinal = "";
 function procesarBusqueda() {
   let texto = null;
@@ -2174,47 +2204,49 @@ function procesarBusqueda() {
 
     return;
   }
+  console.log(esVideoDirecto(url));
   (async () => {
     loading.style.display = "flex";
     // const datos = await fetch("/api/video?url=" + encodeURIComponent(url)).then(
     //   (r) => r.json(),
     // );
+    if (!esVideoDirecto(url)) {
+      const respuesta2 = await fetch(`${API}/obtener-enlace`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url }),
+      });
 
-    const respuesta2 = await fetch(`${API}/obtener-enlace`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url }),
-    });
-
-    const datos2 = await respuesta2.json();
-    console.log(datos2);
-    if (url.includes("ssstwitter")) {
-      nombreFinal = datos2.title || "video";
-    } else if (url.includes("instagram.com/reel")) {
-      directUrl = datos2.direct_url;
-      nombreFinal = datos2.todo.description || datos2.todo.id;
-      //url = directUrl;
-    } else if (
-      url.includes("xhmediacdn") ||
-      url.includes("xhpingcdn") ||
-      url.includes("xhcdn")
-    ) {
-      texto = await navigator.clipboard.readText();
-      //console.log(texto);
-      nombre = texto.split(".-.")[1];
-      nombreFinal = nombre;
-    }
-    if (sitio === "imagen") {
-      if (
-        url.includes("fapello.com") ||
-        url.includes("pbs.twimg.com") ||
-        url.includes("pornpics.com")
+      const datos2 = await respuesta2.json();
+      console.log(datos2);
+      if (url.includes("ssstwitter")) {
+        nombreFinal = datos2.title || "video";
+      } else if (url.includes("instagram.com/reel")) {
+        directUrl = datos2.direct_url;
+        nombreFinal = datos2.todo.description || datos2.todo.id;
+        //url = directUrl;
+      } else if (
+        url.includes("xhmediacdn") ||
+        url.includes("xhpingcdn") ||
+        url.includes("xhcdn")
       ) {
-        nombre = obtenerNombreConExtension(url);
+        texto = await navigator.clipboard.readText();
+        //console.log(texto);
+        nombre = texto.split(".-.")[1];
         nombreFinal = nombre;
-        cambiarPreview("imagen", url);
+      }
+      if (sitio === "imagen") {
+        if (
+          url.includes("fapello.com") ||
+          url.includes("pbs.twimg.com") ||
+          url.includes("pornpics.com")
+        ) {
+          nombre = obtenerNombreConExtension(url);
+          nombreFinal = nombre;
+          cambiarPreview("imagen", url);
+        }
       }
     }
 
