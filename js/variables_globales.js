@@ -177,6 +177,7 @@ if (domain.includes("pornhub")) {
   host = fullUrl;
   //backgroundColor = `var(--primitives-colors-neutral-990)`;
   backgroundColor = `#0f0f0fbd`;
+  
 } else if (domain.includes("manyvids")) {
   logo = "https://logos.manyvids.com/icon_public/favicon-32x32.png?v=4";
 } else if (domain.includes("twpornstars")) {

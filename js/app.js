@@ -1452,6 +1452,15 @@ function mostrarDescarga(url, nombre) {
   if (url.includes("redgifs.com")) {
     logo = "https://www.redgifs.com/static/logo-full-red-C9X7m0yF.svg";
     //nombreFinal = url.split("/").pop().replace(".mp4", "");
+  } else if (url.includes("porn4fans.com/get_file")) {
+    logo = "https://www.porn4fans.com/static/images/logo-hover.svg";
+    // (async () => {
+    //   texto = await navigator.clipboard.readText();
+    //   //console.log(texto);
+    //   nombre = texto.split(".-.")[1];
+    //   nombreFinal = nombre;
+    //   console.log(nombreFinal);
+    // })();
   } else if (url.includes("pornhub") || url.includes("phncdn.com")) {
     logo = "https://ei.phncdn.com/pics/logos/10211.png?cache=2025091603";
   } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
@@ -1498,7 +1507,10 @@ function mostrarDescarga(url, nombre) {
     console.log("jaja");
     mostrarPreview44(url, nombre);
   } else if (url.includes("porn4fans.com/get_file")) {
-    mostrarPreviewBackend(url, nombre);
+    //window.open(url, "_blank");
+    (async () => {
+      await descargarVideoNuevo(url, `${nombre}.mp4`);
+    })();
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
   } else if (url.includes("el2.phncdn.com")) {
@@ -1536,7 +1548,11 @@ function mostrarDescarga(url, nombre) {
       if (sitio === "imagen") {
         await descargarImagen(url, `${nombre}`);
       } else {
-        if (url.includes("el2.phncdn.com") || url.includes("downixcdn") || url.includes("porn4fans.com/get_file")) {
+        if (
+          url.includes("el2.phncdn.com") ||
+          url.includes("downixcdn") ||
+          url.includes("porn4fans.com/get_file")
+        ) {
           await descargarVideoNuevo(url, `${nombre}.mp4`);
         } else {
           await descargarDesdeServidor(url, `${nombre}`);
@@ -2162,6 +2178,16 @@ function procesarBusqueda() {
   if (url.includes("redgifs.com")) {
     logo = "https://www.redgifs.com/static/logo-full-red-C9X7m0yF.svg";
     nombreFinal = url.split("/").pop().replace(".mp4", "");
+  } else if (url.includes("porn4fans.com/get_file")) {
+    logo = "https://www.porn4fans.com/static/images/logo-hover.svg";
+    backgroundColor = `#131313`;
+    (async () => {
+      texto = await navigator.clipboard.readText();
+      //console.log(texto);
+      nombre = texto.split(".-.")[1];
+      nombreFinal = nombre;
+      console.log(nombreFinal);
+    })();
   } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
     logo = "https://www.twpornstars.com/favicon.ico";
     const nomTemp = url.split("?")[0];
