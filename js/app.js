@@ -1498,7 +1498,7 @@ function mostrarDescarga(url, nombre) {
     console.log("jaja");
     mostrarPreview44(url, nombre);
   } else if (url.includes("porn4fans.com/get_file")) {
-    mostrarPreviewNuevo(url, nombre);
+    mostrarPreviewBackend(url, nombre);
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
   } else if (url.includes("el2.phncdn.com")) {
@@ -2025,6 +2025,34 @@ function mostrarPreviewNuevo(url, titulo = "") {
   };
 }
 
+function mostrarPreviewBackend(url, titulo = "") {
+  const preview = document.getElementById("preview");
+  const video = document.getElementById("videoPreview");
+  const info = document.getElementById("videoInfo");
+
+  video.pause();
+
+  const backend = "https://TU-BACKEND.onrender.com";
+
+  const previewUrl = `${API}/previewNuevo?url=${encodeURIComponent(url)}`;
+
+  console.log("Preview:", previewUrl);
+
+  video.removeAttribute("src");
+  video.load();
+
+  video.src = previewUrl;
+
+  info.textContent = titulo;
+
+  preview.classList.remove("oculto");
+
+  video.load();
+
+  video.play().catch((error) => {
+    console.log("Reproducción automática bloqueada:", error);
+  });
+}
 // function mostrarPreviewRedgifs2(url, titulo = "") {
 //   const video = document.getElementById("videoPreview");
 //   const info = document.getElementById("videoInfo");

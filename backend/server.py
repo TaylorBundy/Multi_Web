@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify, send_file, Response
 from flask_cors import CORS
 from yt_dlp import YoutubeDL
 import yt_dlp
+from curl_cffi import requests
 
 app = Flask(__name__)
 CORS(app)  # Permite que tu HTML se conecte desde otro origen si es necesario
@@ -347,6 +348,79 @@ def preview_video():
     except Exception as e:
         print("Error en /preview:", e)
         return "Error interno del servidor", 500
+
+
+@app.route("/previewNuevo")
+def preview_nuevo():
+
+    url = request.args.get("url")
+
+    if not url:
+        return "Falta URL", 400
+
+    try:
+
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/149.0.0.0 Safari/537.36"
+            ),
+            "Accept": "*/*",
+            "Referer": "https://es.porn4fans.com/",
+        }
+
+        # Pasar Range del navegador
+        range_header = request.headers.get("Range")
+
+        if range_header:
+            headers["Range"] = range_header
+
+        r = requests.get(
+            url, headers=headers, impersonate="chrome", stream=True, timeout=30
+        )
+
+        print("PREVIEW STATUS:", r.status_code)
+        print("CONTENT TYPE:", r.headers.get("Content-Type"))
+        print("CONTENT LENGTH:", r.headers.get("Content-Length"))
+        print("CONTENT RANGE:", r.headers.get("Content-Range"))
+
+        if r.status_code not in (200, 206):
+            return (f"Error remoto: HTTP {r.status_code}", r.status_code)
+
+        response_headers = {
+            "Content-Type": r.headers.get("Content-Type", "video/mp4"),
+            "Accept-Ranges": "bytes",
+        }
+
+        for header in ["Content-Length", "Content-Range", "ETag", "Last-Modified"]:
+            value = r.headers.get(header)
+
+            if value:
+                response_headers[header] = value
+
+        def generate():
+
+            try:
+                for chunk in r.iter_content(chunk_size=64 * 1024):
+                    if chunk:
+                        yield chunk
+
+            finally:
+                r.close()
+
+        return Response(
+            generate(),
+            status=r.status_code,
+            headers=response_headers,
+            direct_passthrough=True,
+        )
+
+    except Exception as e:
+
+        print("ERROR PREVIEW:", e)
+
+        return (f"Error obteniendo preview: {str(e)}", 500)
 
 
 if __name__ == "__main__":
