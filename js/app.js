@@ -1493,13 +1493,17 @@ function mostrarDescarga(url, nombre) {
   if (
     url.includes("media.redgifs.com") ||
     url.includes("kl.phncdn.com") ||
+    //url.includes("porn4fans.com/get_file") ||
     url.includes("ssstwitter")
   ) {
     console.log("jaja");
     mostrarPreview44(url, nombre);
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
-  } else if (url.includes("el2.phncdn.com")) {
+  } else if (
+    url.includes("el2.phncdn.com") ||
+    url.includes("porn4fans.com/get_file")
+  ) {
     mostrarPreview2(url, nombre);
   } else if (url.includes("downixcdn")) {
     mostrarPreview2(url, nombre);
