@@ -2,4 +2,5 @@ flask
 requests
 flask-cors
 python-dotenv
+curl_cffi
 yt-dlp
