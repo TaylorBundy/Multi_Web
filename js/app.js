@@ -862,6 +862,8 @@ async function descargarImagen2(url, nombre = "imagen") {
 }
 
 async function descargarVideoNuevo(url, nombre = "video.mp4") {
+  console.log("URL:", url);
+  console.log("Nombre:", nombre);
   // Modal
   const modal = document.createElement("div");
   modal.style.cssText = `
@@ -1499,6 +1501,12 @@ function mostrarDescarga(url, nombre) {
     `);
   const boton = document.getElementById("btnDescargar");
   boton.title = `Click para descargar: ${url}`;
+  if (url.includes("porn4fans.com/get_file")) {
+    //window.open(url, "_blank");
+    //(async () => {
+    descargarVideoNuevo(url, nombre);
+    //})();
+  }
   if (
     url.includes("media.redgifs.com") ||
     url.includes("kl.phncdn.com") ||
@@ -1506,11 +1514,8 @@ function mostrarDescarga(url, nombre) {
   ) {
     console.log("jaja");
     mostrarPreview44(url, nombre);
-  } else if (url.includes("porn4fans.com/get_file")) {
-    //window.open(url, "_blank");
-    (async () => {
-      await descargarVideoNuevo(url, `${nombre}.mp4`);
-    })();
+  } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
+    mostrarPreviewPrueba(url, nombre);
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
   } else if (url.includes("el2.phncdn.com")) {
@@ -1548,11 +1553,7 @@ function mostrarDescarga(url, nombre) {
       if (sitio === "imagen") {
         await descargarImagen(url, `${nombre}`);
       } else {
-        if (
-          url.includes("el2.phncdn.com") ||
-          url.includes("downixcdn") ||
-          url.includes("porn4fans.com/get_file")
-        ) {
+        if (url.includes("el2.phncdn.com") || url.includes("downixcdn")) {
           await descargarVideoNuevo(url, `${nombre}.mp4`);
         } else {
           await descargarDesdeServidor(url, `${nombre}`);
@@ -1903,6 +1904,16 @@ function mostrarDescarga(url, nombre) {
   // });
 }
 
+function mostrarPreviewPrueba(url, tipo, info = "") {
+  const preview = document.getElementById("preview");
+  const video = document.getElementById("videoPreview");
+  const videoInfo = document.getElementById("videoInfo");
+  video.innerHTML = "<source src='" + url + "' type='video/mp4'>";
+  preview.classList.remove("oculto");
+  document.getElementById("#nuevo > source").src = url;
+  video.load();
+}
+
 function mostrarPreviewX(url, titulo = "") {
   const preview = document.getElementById("preview");
   const video = document.getElementById("videoPreview");
@@ -2251,13 +2262,13 @@ function procesarBusqueda() {
     return;
   }
 
-  sitio = detectarSitio(url);
+  //sitio = detectarSitio(url);
 
-  if (!sitio) {
-    alerta("Sitio no soportado");
+  //if (!sitio) {
+  //alerta("Sitio no soportado");
 
-    return;
-  }
+  //return;
+  //}
   console.log(esVideoDirecto(url));
   (async () => {
     loading.style.display = "flex";
