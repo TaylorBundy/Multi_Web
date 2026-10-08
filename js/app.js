@@ -272,6 +272,48 @@ let sitio;
 //   URL.revokeObjectURL(enlace.href);
 // }
 
+async function obtenerMedia(link) {
+  const response = await fetch(link, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  const html = await response.text();
+
+  const resultado = {
+    tipo: null,
+    url: null,
+    urls: [],
+  };
+
+  // Buscar URLs de videos
+  const videos =
+    html.match(
+      /https?:\/\/[^"'\\\s]+?\.(?:mp4|webm|m3u8|mov|mkv)(?:\?[^"'\\\s]*)?/gi,
+    ) || [];
+
+  // Buscar URLs de imágenes
+  const imagenes =
+    html.match(
+      /https?:\/\/[^"'\\\s]+?\.(?:jpg|jpeg|png|webp|gif|avif)(?:\?[^"'\\\s]*)?/gi,
+    ) || [];
+
+  if (videos.length > 0) {
+    resultado.tipo = "video";
+    resultado.urls = [...new Set(videos)];
+    resultado.url = resultado.urls[0];
+  } else if (imagenes.length > 0) {
+    resultado.tipo = "imagen";
+    resultado.urls = [...new Set(imagenes)];
+    resultado.url = resultado.urls[0];
+  }
+
+  return resultado;
+}
+
 function obtenerNombreConExtension(url) {
   try {
     const urlObj = new URL(url);
@@ -1515,7 +1557,7 @@ function mostrarDescarga(url, nombre) {
     console.log("jaja");
     mostrarPreview44(url, nombre);
   } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
-    mostrarPreviewPrueba(url, nombre);
+    mostrarPreview2(url, nombre);
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
   } else if (url.includes("el2.phncdn.com")) {
@@ -1907,10 +1949,12 @@ function mostrarDescarga(url, nombre) {
 function mostrarPreviewPrueba(url, tipo, info = "") {
   const preview = document.getElementById("preview");
   const video = document.getElementById("videoPreview");
+  const video1 = document.getElementById("nuevo");
   const videoInfo = document.getElementById("videoInfo");
-  video.innerHTML = "<source src='" + url + "' type='video/mp4'>";
+  //video.innerHTML = "<source src='" + url + "' type='video/mp4'>";
+  video.src = url;
+  //video1.querySelector("source").src = url;
   preview.classList.remove("oculto");
-  document.getElementById("#nuevo > source").src = url;
   video.load();
 }
 
@@ -2183,7 +2227,8 @@ function esVideoDirecto(url) {
 function procesarBusqueda() {
   let texto = null;
   let nombre = null;
-  const url = document.getElementById("url").value;
+  let url;
+  url = document.getElementById("url").value;
   //const nombreFinal = url.split("/").pop().replace(".mp4", "");
   //console.log("Nombre final:", nombreFinal);
   if (url.includes("redgifs.com")) {
@@ -2203,6 +2248,9 @@ function procesarBusqueda() {
     logo = "https://www.twpornstars.com/favicon.ico";
     const nomTemp = url.split("?")[0];
     nombreFinal = nomTemp.split("/").pop().replace(".mp4", "");
+    //(async () => {
+
+    //})();
   } else if (
     url.includes("media.fastdl") ||
     url.includes("instagram.com/reel")
@@ -2271,6 +2319,10 @@ function procesarBusqueda() {
   //}
   console.log(esVideoDirecto(url));
   (async () => {
+    if (url.includes("twpornstars")) {
+      const ennnn = await obtenerMedia(url);
+      url = ennnn;
+    }
     loading.style.display = "flex";
     // const datos = await fetch("/api/video?url=" + encodeURIComponent(url)).then(
     //   (r) => r.json(),
