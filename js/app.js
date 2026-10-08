@@ -1557,7 +1557,7 @@ function mostrarDescarga(url, nombre) {
     console.log("jaja");
     mostrarPreview44(url, nombre);
   } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
-    mostrarPreview2(url, nombre);
+    mostrarPreviewBackend(url, nombre);
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
   } else if (url.includes("el2.phncdn.com")) {

@@ -360,49 +360,115 @@ def preview_nuevo():
 
     try:
 
+        # ==========================
+        # HEADERS DEL CLIENTE
+        # ==========================
+
         headers = {
-            "User-Agent": (
+            "User-Agent": request.headers.get(
+                "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
                 "Chrome/149.0.0.0 Safari/537.36"
             ),
-            "Accept": "*/*",
-            "Referer": "https://es.porn4fans.com/",
+            "Accept": request.headers.get(
+                "Accept",
+                "*/*"
+            )
         }
 
-        # Pasar Range del navegador
+        # Mantener Range para videos
         range_header = request.headers.get("Range")
 
         if range_header:
             headers["Range"] = range_header
 
+        # ==========================
+        # REFERER
+        # ==========================
+
+        # Si el navegador manda Referer lo usamos.
+        # Si no, no agregamos uno artificial.
+        referer = request.headers.get("Referer")
+
+        if referer:
+            headers["Referer"] = referer
+
+        # ==========================
+        # REQUEST REMOTO
+        # ==========================
+
         r = requests.get(
-            url, headers=headers, impersonate="chrome", stream=True, timeout=30
+            url,
+            headers=headers,
+            impersonate="chrome",
+            stream=True,
+            timeout=30
         )
 
-        print("PREVIEW STATUS:", r.status_code)
+        print("================================")
+        print("PREVIEW")
+        print("URL:", url)
+        print("STATUS:", r.status_code)
         print("CONTENT TYPE:", r.headers.get("Content-Type"))
         print("CONTENT LENGTH:", r.headers.get("Content-Length"))
         print("CONTENT RANGE:", r.headers.get("Content-Range"))
+        print("================================")
 
         if r.status_code not in (200, 206):
-            return (f"Error remoto: HTTP {r.status_code}", r.status_code)
+            r.close()
 
-        response_headers = {
-            "Content-Type": r.headers.get("Content-Type", "video/mp4"),
-            "Accept-Ranges": "bytes",
-        }
+            return (
+                f"Error remoto: HTTP {r.status_code}",
+                r.status_code
+            )
 
-        for header in ["Content-Length", "Content-Range", "ETag", "Last-Modified"]:
+        # ==========================
+        # HEADERS DE RESPUESTA
+        # ==========================
+
+        response_headers = {}
+
+        headers_a_conservar = [
+            "Content-Type",
+            "Content-Length",
+            "Content-Range",
+            "Accept-Ranges",
+            "ETag",
+            "Last-Modified",
+            "Cache-Control",
+            "Expires"
+        ]
+
+        for header in headers_a_conservar:
+
             value = r.headers.get(header)
 
             if value:
                 response_headers[header] = value
 
+        # Si el servidor remoto no devuelve Content-Type
+        if "Content-Type" not in response_headers:
+
+            response_headers["Content-Type"] = (
+                "application/octet-stream"
+            )
+
+        # El navegador necesita esto para poder hacer seeking
+        response_headers["Accept-Ranges"] = "bytes"
+
+        # ==========================
+        # STREAM
+        # ==========================
+
         def generate():
 
             try:
-                for chunk in r.iter_content(chunk_size=64 * 1024):
+
+                for chunk in r.iter_content(
+                    chunk_size=64 * 1024
+                ):
+
                     if chunk:
                         yield chunk
 
@@ -413,14 +479,17 @@ def preview_nuevo():
             generate(),
             status=r.status_code,
             headers=response_headers,
-            direct_passthrough=True,
+            direct_passthrough=True
         )
 
     except Exception as e:
 
         print("ERROR PREVIEW:", e)
 
-        return (f"Error obteniendo preview: {str(e)}", 500)
+        return (
+            f"Error obteniendo preview: {str(e)}",
+            500
+        )
 
 
 if __name__ == "__main__":
