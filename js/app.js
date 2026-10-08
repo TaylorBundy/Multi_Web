@@ -1550,20 +1550,28 @@ function mostrarDescarga(url, nombre) {
     //})();
   }
   if (
-    url.includes("media.redgifs.com") ||
+    //url.includes("media.redgifs.com") ||
     url.includes("kl.phncdn.com") ||
     url.includes("ssstwitter")
   ) {
     console.log("jaja");
-    mostrarPreview44(url, nombre);
-  } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
+    //mostrarPreview44(url, nombre);
+    mostrarPreviewBackend(url, nombre);
+  } else if (
+    url.includes("twpornstars") ||
+    url.includes("video.twimg.com") ||
+    url.includes("pornhub.com/view_video") ||
+    url.includes("media.redgifs.com")
+  ) {
     mostrarPreviewBackend(url, nombre);
   } else if (url.includes("instagram.com/reel")) {
     mostrarPreview44(directUrl, nombre);
   } else if (url.includes("el2.phncdn.com")) {
-    mostrarPreview2(url, nombre);
+    //mostrarPreview2(url, nombre);
+    mostrarPreviewBackend(url, nombre);
   } else if (url.includes("downixcdn")) {
-    mostrarPreview2(url, nombre);
+    //mostrarPreview2(url, nombre);
+    mostrarPreviewBackend(url, nombre);
   } else {
     if (sitio === "imagen") {
       mostrarPreview(url, sitio, nombre);
@@ -2225,6 +2233,7 @@ function esVideoDirecto(url) {
 
 //let nombreFinal = "";
 function procesarBusqueda() {
+  let userId;
   let texto = null;
   let nombre = null;
   let url;
@@ -2266,12 +2275,14 @@ function procesarBusqueda() {
   } else if (url.includes("ssstwitter")) {
     logo =
       "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
+  } else if (url.includes("kl.phncdn.com/pics/gifs")) {
+    sitio = "imagen";
   } else if (url.includes("es.pornhub.com/view_video.php?viewkey")) {
-    window.open("https://downix.org", "_blank");
-    setTimeout(() => {
-      window.close();
-    }, 5000); // 5 segundos
-    return;
+    // window.open("https://downix.org", "_blank");
+    // setTimeout(() => {
+    //   window.close();
+    // }, 5000); // 5 segundos
+    // return;
   } else if (url.includes("https://ar.xhamster.com/videos/")) {
     const nomTemp = url.split("/")[4];
     //localStorage.setItem("xhamster_video", nomTemp);
@@ -2302,12 +2313,14 @@ function procesarBusqueda() {
     url.includes("/status/") ||
     url.includes("/video/")
   ) {
-    window.open("https://ssstwitter.com", "_blank");
-    //window.close();
-    //setTimeout(() => {
-    window.close();
-    //}, 3000); // 5 segundos
-    return;
+    userId = url.split("/")[3];
+    console.log("User ID:", userId);
+    // window.open("https://ssstwitter.com", "_blank");
+    // //window.close();
+    // //setTimeout(() => {
+    // window.close();
+    // //}, 3000); // 5 segundos
+    // return;
   }
 
   //sitio = detectarSitio(url);
@@ -2320,8 +2333,22 @@ function procesarBusqueda() {
   console.log(esVideoDirecto(url));
   (async () => {
     if (url.includes("twpornstars")) {
-      const ennnn = await obtenerMedia(url);
-      url = ennnn;
+      //const ennnn = await obtenerMedia(url);
+      //url = ennnn;
+    } else if (url.includes(`x.com/${userId}/status/`)) {
+      const respuesta2 = await fetch("http://127.0.0.1:5000/tweet-detail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: url,
+        }),
+      });
+
+      const datos2 = await respuesta2.json();
+
+      console.log("TweetDetail:", datos2);
     }
     loading.style.display = "flex";
     // const datos = await fetch("/api/video?url=" + encodeURIComponent(url)).then(
@@ -2358,7 +2385,8 @@ function procesarBusqueda() {
         if (
           url.includes("fapello.com") ||
           url.includes("pbs.twimg.com") ||
-          url.includes("pornpics.com")
+          url.includes("pornpics.com") ||
+          url.includes("kl.phncdn.com/pics/gifs")
         ) {
           nombre = obtenerNombreConExtension(url);
           nombreFinal = nombre;
