@@ -1954,17 +1954,17 @@ function mostrarDescarga(url, nombre) {
   // });
 }
 
-function mostrarPreviewPrueba(url, tipo, info = "") {
-  const preview = document.getElementById("preview");
-  const video = document.getElementById("videoPreview");
-  const video1 = document.getElementById("nuevo");
-  const videoInfo = document.getElementById("videoInfo");
-  //video.innerHTML = "<source src='" + url + "' type='video/mp4'>";
-  video.src = url;
-  //video1.querySelector("source").src = url;
-  preview.classList.remove("oculto");
-  video.load();
-}
+// function mostrarPreviewPrueba(url, tipo, info = "") {
+//   const preview = document.getElementById("preview");
+//   const video = document.getElementById("videoPreview");
+//   const video1 = document.getElementById("nuevo");
+//   const videoInfo = document.getElementById("videoInfo");
+//   //video.innerHTML = "<source src='" + url + "' type='video/mp4'>";
+//   video.src = url;
+//   //video1.querySelector("source").src = url;
+//   preview.classList.remove("oculto");
+//   video.load();
+// }
 
 function mostrarPreviewX(url, titulo = "") {
   const preview = document.getElementById("preview");
@@ -2128,9 +2128,9 @@ function mostrarPreviewBackend(url, titulo = "") {
 
   video.load();
 
-  video.play().catch((error) => {
-    console.log("Reproducción automática bloqueada:", error);
-  });
+  // video.play().catch((error) => {
+  //   console.log("Reproducción automática bloqueada:", error);
+  // });
 }
 // function mostrarPreviewRedgifs2(url, titulo = "") {
 //   const video = document.getElementById("videoPreview");
