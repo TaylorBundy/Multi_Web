@@ -405,7 +405,7 @@ def descargar_video():
         agregar_metadatos_video(
             archivo=filename_actual,
             titulo=titulo_limpio,
-            descripcion=descripcion,
+            descripcion=url_video,
             subtitulo=subtitulo,
             comentarios="Descargado con MultiWeb",
         )
