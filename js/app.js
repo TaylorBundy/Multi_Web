@@ -1505,7 +1505,11 @@ function mostrarDescarga(url, nombre) {
     //   nombreFinal = nombre;
     //   console.log(nombreFinal);
     // })();
-  } else if (url.includes("pornhub") || url.includes("phncdn.com")) {
+  } else if (
+    url.includes("pornhub") ||
+    url.includes("phncdn.com") ||
+    url.includes("downixcdn")
+  ) {
     logo = "https://ei.phncdn.com/pics/logos/10211.png?cache=2025091603";
   } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
     //logo = "https://www.twpornstars.com/favicon.ico";
@@ -1572,7 +1576,7 @@ function mostrarDescarga(url, nombre) {
     mostrarPreviewBackend(url, nombre);
   } else if (url.includes("downixcdn")) {
     //mostrarPreview2(url, nombre);
-    mostrarPreviewBackend(url, nombre);
+    mostrarPreview2(url, nombre);
   } else {
     if (sitio === "imagen") {
       mostrarPreview(url, sitio, nombre);
@@ -2053,7 +2057,7 @@ function mostrarPreview(url, tipo, info = "") {
   // =========================
 
   //videoInfo.textContent = info;
-  videoInfo.innerHTML = `<img src="${logo}" style="width: unset; border-radius: 10px; background-color: ${backgroundColor}; height: 40px; vertical-align: middle; margin: 0 5px 5px 0;"> ${titulo}`;
+  videoInfo.innerHTML = `<img src="${logo}" style="width: unset; border-radius: 10px; background-color: ${backgroundColor}; height: 40px; vertical-align: middle; margin: 0 5px 5px 0;"> ${tipo}`;
 }
 
 function mostrarPreview2(url, titulo = "") {
@@ -2069,15 +2073,16 @@ function mostrarPreview2(url, titulo = "") {
   video.load();
 
   // Información
-  info.textContent = titulo;
+  //info.textContent = titulo;
+  info.innerHTML = `<img src="${logo}" style="width: unset; border-radius: 10px; background-color: ${backgroundColor}; height: 40px; vertical-align: middle; margin: 0 5px 5px 0;"> ${titulo}`;
 
   // Mostrar preview
   preview.classList.remove("oculto");
 
   // Reproducir cuando esté listo
-  video.play().catch((error) => {
-    console.log("La reproducción automática fue bloqueada:", error);
-  });
+  // video.play().catch((error) => {
+  //   console.log("La reproducción automática fue bloqueada:", error);
+  // });
 }
 
 function mostrarPreviewNuevo(url, titulo = "") {
