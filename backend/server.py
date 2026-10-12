@@ -1,4 +1,5 @@
 import os, requests
+import subprocess
 import glob
 from flask import Flask, request, jsonify, send_file, Response
 from flask_cors import CORS
@@ -13,6 +14,72 @@ CORS(app)  # Permite que tu HTML se conecte desde otro origen si es necesario
 # Crear directorio temporal si no existe
 TEMP_DIR = os.path.join(os.getcwd(), "descargas_temp")
 os.makedirs(TEMP_DIR, exist_ok=True)
+
+
+def agregar_metadatos_video(
+    archivo,
+    titulo="",
+    descripcion="",
+    subtitulo="",
+    comentarios="",
+):
+    """
+    Agrega metadatos al archivo de video usando FFmpeg.
+    Conserva los streams de audio y video sin recodificarlos.
+    """
+    nombre, extension = os.path.splitext(archivo)
+
+    archivo_temporal = f"{nombre}_metadatos{extension}"
+
+    try:
+        metadatos = {
+            "title": titulo,
+            "description": descripcion,
+            "comment": comentarios,
+            "subtitle": subtitulo,
+        }
+
+        comando = [
+            "ffmpeg",
+            "-y",
+            "-i",
+            archivo,
+            "-map",
+            "0",
+            "-c",
+            "copy",
+        ]
+
+        for campo, valor in metadatos.items():
+            if valor:
+                comando.extend(["-metadata", f"{campo}={valor}"])
+
+        comando.append(archivo_temporal)
+
+        resultado = subprocess.run(
+            comando,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+
+        if resultado.returncode != 0:
+            raise RuntimeError(resultado.stderr[-3000:])
+
+        if not os.path.exists(archivo_temporal):
+            raise RuntimeError("FFmpeg no generó el archivo.")
+
+        os.replace(archivo_temporal, archivo)
+
+        return True
+
+    except Exception:
+        if os.path.exists(archivo_temporal):
+            os.remove(archivo_temporal)
+
+        raise
 
 
 def obtener_metadata(url: str):
@@ -329,14 +396,34 @@ def descargar_video():
                 500,
             )
 
+        # Obtener los metadatos originales de yt-dlp
+        titulo_limpio = info.get("title") or "video"
+        descripcion = info.get("description") or ""
+        subtitulo = info.get("alt_title") or ""
+
+        # Incorporar los metadatos al archivo
+        agregar_metadatos_video(
+            archivo=filename_actual,
+            titulo=titulo_limpio,
+            descripcion=descripcion,
+            subtitulo=subtitulo,
+            comentarios="Descargado con MultiWeb",
+        )
+
         print("Archivo generado:", filename_actual)
         print("Tamaño:", os.path.getsize(filename_actual))
 
+        extension = os.path.splitext(filename_actual)[1]
+
         response = send_file(
             filename_actual,
-            mimetype="video/mp4",
+            mimetype=(
+                "video/mp4"
+                if extension.lower() == ".mp4"
+                else "application/octet-stream"
+            ),
             as_attachment=True,
-            download_name=f"{titulo_limpio}.mp4",
+            download_name=f"{titulo_limpio}{extension}",
         )
 
         @response.call_on_close
@@ -344,11 +431,35 @@ def descargar_video():
             try:
                 if os.path.exists(filename_actual):
                     os.remove(filename_actual)
-                    print("Archivo temporal eliminado:", filename_actual)
+                    print(
+                        "Archivo temporal eliminado:",
+                        filename_actual,
+                    )
             except Exception as e:
                 print("Error al eliminar archivo:", e)
 
         return response
+
+        # print("Archivo generado:", filename_actual)
+        # print("Tamaño:", os.path.getsize(filename_actual))
+
+        # response = send_file(
+        #     filename_actual,
+        #     mimetype="video/mp4",
+        #     as_attachment=True,
+        #     download_name=f"{titulo_limpio}.mp4",
+        # )
+
+        # @response.call_on_close
+        # def eliminar_temporal():
+        #     try:
+        #         if os.path.exists(filename_actual):
+        #             os.remove(filename_actual)
+        #             print("Archivo temporal eliminado:", filename_actual)
+        #     except Exception as e:
+        #         print("Error al eliminar archivo:", e)
+
+        # return response
 
     except Exception as e:
         print("ERROR /descargar:", e)
