@@ -16,7 +16,7 @@ TEMP_DIR = os.path.join(os.getcwd(), "descargas_temp")
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 
-def agregar_metadatos_video(
+def agregar_metadatos_video2(
     archivo,
     titulo="",
     descripcion="",
@@ -79,6 +79,79 @@ def agregar_metadatos_video(
         if os.path.exists(archivo_temporal):
             os.remove(archivo_temporal)
 
+        raise
+
+
+def agregar_metadatos_video(
+    archivo,
+    titulo="",
+    descripcion="",
+    subtitulo="",
+    comentarios="",
+):
+    nombre, _ = os.path.splitext(archivo)
+
+    # Forzar una extensión reconocible por FFmpeg
+    archivo_temporal = f"{nombre}_metadatos.mp4"
+
+    try:
+        metadatos = {
+            "title": titulo,
+            "description": descripcion,
+            "comment": comentarios,
+            "subtitle": subtitulo,
+        }
+
+        comando = [
+            "ffmpeg",
+            "-y",
+            "-i",
+            archivo,
+            "-map",
+            "0",
+            "-c",
+            "copy",
+        ]
+
+        for campo, valor in metadatos.items():
+            if valor:
+                comando.extend(
+                    [
+                        "-metadata",
+                        f"{campo}={valor}",
+                    ]
+                )
+
+        # Indicar explícitamente el formato de salida
+        comando.extend(
+            [
+                "-f",
+                "mp4",
+                archivo_temporal,
+            ]
+        )
+
+        resultado = subprocess.run(
+            comando,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+
+        if resultado.returncode != 0:
+            raise RuntimeError(resultado.stderr[-3000:])
+
+        if not os.path.exists(archivo_temporal):
+            raise RuntimeError("FFmpeg no generó el archivo MP4.")
+
+        # Devolver la ruta del nuevo MP4
+        return archivo_temporal
+
+    except Exception:
+        if os.path.exists(archivo_temporal):
+            os.remove(archivo_temporal)
         raise
 
 
@@ -402,8 +475,17 @@ def descargar_video():
         # subtitulo = info.get("alt_title") or ""
 
         # Incorporar los metadatos al archivo
-        agregar_metadatos_video(
-            archivo=filename_actual,
+        # agregar_metadatos_video(
+        #     archivo=filename_actual,
+        #     titulo=titulo_limpio,
+        #     descripcion="nada",
+        #     subtitulo="nada",
+        #     comentarios=url_video,
+        # )
+        archivo_original = filename_actual
+
+        filename_actual = agregar_metadatos_video(
+            archivo=archivo_original,
             titulo=titulo_limpio,
             descripcion="nada",
             subtitulo="nada",
