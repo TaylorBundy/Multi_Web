@@ -397,12 +397,13 @@ def descargar_video():
             )
 
         # Obtener los metadatos originales de yt-dlp
-        # titulo_limpio = info.get("title") or "video"
+        titulo_limpio = info.get("title") or "video"
         # descripcion = info.get("description") or ""
         # subtitulo = info.get("alt_title") or ""
 
         # Incorporar los metadatos al archivo
         agregar_metadatos_video(
+            archivo=filename_actual,
             comentarios=url_video,
         )
 
