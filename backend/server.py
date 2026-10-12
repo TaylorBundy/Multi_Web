@@ -407,7 +407,7 @@ def descargar_video():
             titulo=titulo_limpio,
             descripcion=url_video,
             subtitulo=subtitulo,
-            comentarios="Descargado con MultiWeb",
+            comentarios=url_video,
         )
 
         print("Archivo generado:", filename_actual)
