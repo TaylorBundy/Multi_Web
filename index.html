@@ -22,37 +22,43 @@
     </header>
 
     <main>
-      <div class="nombreContainer">
-        <input type="text" id="nombre" placeholder="Escriba el nombre." />
-      </div>
-      <section class="busqueda">
-        <input id="url" type="text" placeholder="Pegue aquí la URL del video" />
-        <div class="loadingContainer">
-          <div
-            class="tenor-gif-embed"
-            data-postid="6449096453315144907"
-            data-share-method="host"
-            data-aspect-ratio="0.9875"
-            data-width="100%"
-          >
-            <a href="https://tenor.com/view/loading-gif-6449096453315144907"
-              >Loading Sticker</a
-            >from
-            <a href="https://tenor.com/search/loading-stickers"
-              >Loading Stickers</a
-            >
-          </div>
-          <script
-            type="text/javascript"
-            async
-            src="https://tenor.com/embed.js"
-          ></script>
+      <div class="busquedaContainer">
+        <div class="nombreContainer">
+          <input type="text" id="nombre" placeholder="Escriba el nombre." />
         </div>
+        <section class="busqueda">
+          <input
+            id="url"
+            type="text"
+            placeholder="Pegue aquí la URL del video"
+          />
+          <div class="loadingContainer">
+            <div
+              class="tenor-gif-embed"
+              data-postid="6449096453315144907"
+              data-share-method="host"
+              data-aspect-ratio="0.9875"
+              data-width="100%"
+            >
+              <a href="https://tenor.com/view/loading-gif-6449096453315144907"
+                >Loading Sticker</a
+              >from
+              <a href="https://tenor.com/search/loading-stickers"
+                >Loading Stickers</a
+              >
+            </div>
+            <script
+              type="text/javascript"
+              async
+              src="https://tenor.com/embed.js"
+            ></script>
+          </div>
 
-        <button id="buscar">
-          <img id="btnImage" src="imagenes/busqueda.avif" /> Buscar
-        </button>
-      </section>
+          <button id="buscar">
+            <img id="btnImage" src="imagenes/busqueda.avif" /> Buscar
+          </button>
+        </section>
+      </div>
 
       <section id="preview" class="preview oculto">
         <div id="videoInfo"></div>
@@ -70,7 +76,7 @@
 
       <section id="resultado"></section>
 
-      <section id="resultado"></section>
+      <!-- <section id="resultado"></section> -->
     </main>
 
     <footer>© 2026</footer>

@@ -949,7 +949,7 @@ async function descargarVideoNuevo(url, nombre = "video.mp4") {
         margin-bottom: 15px;
         word-break: break-word;
     `;
-  titulo.textContent = `ߓ Descargando: ${nombre}`; //`⬇ Descargando: ${nombre}`;
+  titulo.textContent = `📥 Descargando: ${nombre}`; //`⬇ Descargando: ${nombre}`;
 
   const porcentajeTexto = document.createElement("div");
   porcentajeTexto.style.cssText = `
@@ -1112,7 +1112,7 @@ async function descargarVideoNuevo(url, nombre = "video.mp4") {
 }
 
 async function descargarDesdeServidor(url, nombre = "video.mp4") {
-  const backgroundColor = "#f0f0f0";
+  //const backgroundColor = "#f0f0f0";
 
   // ==========================================
   // MODAL
@@ -1168,7 +1168,7 @@ async function descargarDesdeServidor(url, nombre = "video.mp4") {
   imagen.src = logo;
 
   if (typeof tamano !== "undefined" && tamano) {
-    imagen.style.width = tamano;
+    imagen.style.height = tamano;
   }
 
   imagenContainer.appendChild(imagen);
@@ -1508,7 +1508,8 @@ function mostrarDescarga(url, nombre) {
   } else if (url.includes("pornhub") || url.includes("phncdn.com")) {
     logo = "https://ei.phncdn.com/pics/logos/10211.png?cache=2025091603";
   } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
-    logo = "https://www.twpornstars.com/favicon.ico";
+    //logo = "https://www.twpornstars.com/favicon.ico";
+    logo = "imagenes/twpornstars2.avif";
     tamano = "30px";
     //const nomTemp = url.split("?")[0];
     //nombreFinal = nomTemp.split("/").pop().replace(".mp4", "");
@@ -2051,7 +2052,8 @@ function mostrarPreview(url, tipo, info = "") {
   // INFORMACIÓN
   // =========================
 
-  videoInfo.textContent = info;
+  //videoInfo.textContent = info;
+  videoInfo.innerHTML = `<img src="${logo}" style="width: unset; border-radius: 10px; background-color: ${backgroundColor}; height: 40px; vertical-align: middle; margin: 0 5px 5px 0;"> ${titulo}`;
 }
 
 function mostrarPreview2(url, titulo = "") {
@@ -2122,8 +2124,8 @@ function mostrarPreviewBackend(url, titulo = "") {
 
   video.src = previewUrl;
 
-  info.textContent = titulo;
-  info.innerHTML = `<img src="${logo}" style="width: unset; background-color: ${backgroundColor}; height: 30px; vertical-align: middle; margin-right: 8px;"> ${titulo}`;
+  //info.textContent = titulo;
+  info.innerHTML = `<img src="${logo}" style="width: unset; border-radius: 10px; background-color: ${backgroundColor}; height: 40px; vertical-align: middle; margin: 0 5px 5px 0;"> ${titulo}`;
 
   preview.classList.remove("oculto");
 
@@ -2239,16 +2241,17 @@ function procesarBusqueda() {
   let nombre = null;
   let url;
   url = document.getElementById("url").value;
-  backgroundColor = `#0f0f0fbd`;
+  backgroundColor = `rgb(7, 112, 177)`; //`#0f0f0fbd`;
   //const nombreFinal = url.split("/").pop().replace(".mp4", "");
   //console.log("Nombre final:", nombreFinal);
   if (url.includes("redgifs.com")) {
     logo = "https://www.redgifs.com/static/logo-full-red-C9X7m0yF.svg";
     nombreFinal = url.split("/").pop().replace(".mp4", "");
-    backgroundColor = `#0f0f0fbd`;
+    nombreArchivo.value = nombreFinal;
+    //backgroundColor = `#0f0f0fbd`;
   } else if (url.includes("porn4fans.com/get_file")) {
     logo = "https://www.porn4fans.com/static/images/logo-hover.svg";
-    backgroundColor = `#131313`;
+    //backgroundColor = `#131313`;
     (async () => {
       texto = await navigator.clipboard.readText();
       //console.log(texto);
@@ -2257,7 +2260,8 @@ function procesarBusqueda() {
       console.log(nombreFinal);
     })();
   } else if (url.includes("twpornstars") || url.includes("video.twimg.com")) {
-    logo = "https://www.twpornstars.com/favicon.ico";
+    //logo = "https://www.twpornstars.com/favicon.ico";
+    logo = "imagenes/twpornstars.avif";
     const nomTemp = url.split("?")[0];
     nombreFinal = nomTemp.split("/").pop().replace(".mp4", "");
     //(async () => {
@@ -2275,10 +2279,11 @@ function procesarBusqueda() {
     //const nomTemp = url.split("?")[0];
     console.log(nombreArchivo.value);
     nombreFinal = nombreArchivo.value; //nomTemp.split("/").pop().replace(".mp4", "");
-    backgroundColor = `#0f0f0fbd`;
+    //backgroundColor = `#0f0f0fbd`;
   } else if (url.includes("ssstwitter")) {
     logo =
       "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
+    backgroundColor = `unset`;
   } else if (url.includes("kl.phncdn.com/pics/gifs")) {
     sitio = "imagen";
   } else if (url.includes("es.pornhub.com/view_video.php?viewkey")) {

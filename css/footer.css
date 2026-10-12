@@ -1,5 +1,6 @@
 footer {
-  margin-top: 60px;
+  margin: auto;
+  margin-top: 10px;
 
   padding: 20px;
 
@@ -8,4 +9,7 @@ footer {
   color: white;
 
   text-align: center;
+  width: 95%;
+  max-width: 1000px;
+  border-radius: 10px;
 }
