@@ -1505,6 +1505,8 @@ function mostrarDescarga(url, nombre) {
     //   nombreFinal = nombre;
     //   console.log(nombreFinal);
     // })();
+  } else if (url.includes("ods.manyvids.com")) {
+    logo = "https://logos.manyvids.com/icon_public/favicon-32x32.png?v=4";
   } else if (
     url.includes("pornhub") ||
     url.includes("phncdn.com") ||
@@ -1566,6 +1568,7 @@ function mostrarDescarga(url, nombre) {
     url.includes("twpornstars") ||
     url.includes("video.twimg.com") ||
     url.includes("pornhub.com/view_video") ||
+    url.includes("manyvids") ||
     url.includes("media.redgifs.com")
   ) {
     mostrarPreviewBackend(url, nombre);
@@ -2288,6 +2291,8 @@ function procesarBusqueda() {
   } else if (url.includes("ssstwitter")) {
     logo =
       "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
+    backgroundColor = `unset`;
+  } else if (url.includes("manyvids")) {
     backgroundColor = `unset`;
   } else if (url.includes("kl.phncdn.com/pics/gifs")) {
     sitio = "imagen";
