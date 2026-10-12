@@ -2123,6 +2123,7 @@ function mostrarPreviewBackend(url, titulo = "") {
   video.src = previewUrl;
 
   info.textContent = titulo;
+  info.innerHTML = `<img src="${logo}" style="width: unset; background-color: ${backgroundColor}; height: 30px; vertical-align: middle; margin-right: 8px;"> ${titulo}`;
 
   preview.classList.remove("oculto");
 
@@ -2238,11 +2239,13 @@ function procesarBusqueda() {
   let nombre = null;
   let url;
   url = document.getElementById("url").value;
+  backgroundColor = `#0f0f0fbd`;
   //const nombreFinal = url.split("/").pop().replace(".mp4", "");
   //console.log("Nombre final:", nombreFinal);
   if (url.includes("redgifs.com")) {
     logo = "https://www.redgifs.com/static/logo-full-red-C9X7m0yF.svg";
     nombreFinal = url.split("/").pop().replace(".mp4", "");
+    backgroundColor = `#0f0f0fbd`;
   } else if (url.includes("porn4fans.com/get_file")) {
     logo = "https://www.porn4fans.com/static/images/logo-hover.svg";
     backgroundColor = `#131313`;
@@ -2272,6 +2275,7 @@ function procesarBusqueda() {
     //const nomTemp = url.split("?")[0];
     console.log(nombreArchivo.value);
     nombreFinal = nombreArchivo.value; //nomTemp.split("/").pop().replace(".mp4", "");
+    backgroundColor = `#0f0f0fbd`;
   } else if (url.includes("ssstwitter")) {
     logo =
       "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
@@ -2366,7 +2370,7 @@ function procesarBusqueda() {
       const datos2 = await respuesta2.json();
       console.log(datos2);
       if (url.includes("ssstwitter")) {
-        nombreFinal = datos2.title || "video";
+        nombreFinal = `${nombreArchivo.value}-${datos2.title}`; //|| "video";
       } else if (url.includes("instagram.com/reel")) {
         directUrl = datos2.direct_url;
         nombreFinal = datos2.todo.description || datos2.todo.id;
