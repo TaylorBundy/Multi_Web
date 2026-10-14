@@ -2183,7 +2183,7 @@ function mostrarPreviewNuevo(url, titulo = "") {
   };
 }
 
-function mostrarPreviewBackend(url, titulo = "") {
+function mostrarPreviewBackend2(url, titulo = "") {
   const preview = document.getElementById("preview");
   const video = document.getElementById("videoPreview");
   const info = document.getElementById("videoInfo");
@@ -2214,6 +2214,96 @@ function mostrarPreviewBackend(url, titulo = "") {
   //   console.log("Reproducción automática bloqueada:", error);
   // });
 }
+
+function mostrarPreviewBackend(url, titulo = "") {
+  const preview = document.getElementById("preview");
+  const video = document.getElementById("videoPreview");
+  const info = document.getElementById("videoInfo");
+
+  // Servidores disponibles
+  const servidores = [
+    "https://multi-web-uf1z.onrender.com",
+    "https://taylorbundy.pythonanywhere.com",
+  ];
+
+  let servidorActual = 0;
+  let intento = 0;
+
+  video.pause();
+
+  // Limpiar el video anterior
+  video.removeAttribute("src");
+  video.load();
+
+  // Mostrar información
+  info.innerHTML = `
+    <img
+      src="${logo}"
+      style="
+        width: unset;
+        border-radius: 10px;
+        background-color: ${backgroundColor};
+        height: 40px;
+        vertical-align: middle;
+        margin: 0 5px 5px 0;
+      "
+    >
+    ${titulo}
+  `;
+
+  preview.classList.remove("oculto");
+
+  // Construir URL y probar el servidor correspondiente
+  function cargarPreview() {
+    if (servidorActual >= servidores.length) {
+      console.error("Todos los servidores fallaron.");
+
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+
+      info.innerHTML += `
+        <p style="color: red;">
+          No se pudo cargar el preview.
+          Todos los servidores fallaron.
+        </p>
+      `;
+
+      return;
+    }
+
+    const API = servidores[servidorActual];
+
+    const previewUrl = `${API}/previewNuevo?url=${encodeURIComponent(url)}&t=${Date.now()}`;
+
+    console.log(`Intento ${servidorActual + 1}:`, previewUrl);
+
+    intento = servidorActual;
+
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+
+    video.src = previewUrl;
+    video.load();
+  }
+
+  // Si falla la carga, intentar con el siguiente servidor
+  video.onerror = function () {
+    console.error(
+      "Error cargando preview desde:",
+      servidores[intento],
+      video.error,
+    );
+
+    servidorActual++;
+
+    cargarPreview();
+  };
+
+  cargarPreview();
+}
+
 // function mostrarPreviewRedgifs2(url, titulo = "") {
 //   const video = document.getElementById("videoPreview");
 //   const info = document.getElementById("videoInfo");
