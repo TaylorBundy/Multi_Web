@@ -2215,6 +2215,43 @@ function mostrarPreviewBackend2(url, titulo = "") {
   // });
 }
 
+let servidorActual = 0;
+let intento = 0;
+
+// Construir URL y probar el servidor correspondiente
+function cargarPreview(video, info, url) {
+  if (servidorActual >= SERVIDORES.length) {
+    console.error("Todos los servidores fallaron.");
+
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+
+    info.innerHTML += `
+        <p style="color: red;">
+          No se pudo cargar el preview.
+          Todos los servidores fallaron.
+        </p>
+      `;
+
+    return;
+  }
+  const API = SERVIDORES[servidorActual];
+
+  const previewUrl = `${API}/previewNuevo?url=${encodeURIComponent(url)}&t=${Date.now()}`;
+
+  console.log(`Intento ${servidorActual + 1}:`, previewUrl);
+
+  intento = servidorActual;
+
+  video.pause();
+  video.removeAttribute("src");
+  video.load();
+
+  video.src = previewUrl;
+  video.load();
+}
+
 function mostrarPreviewBackend(url, titulo = "") {
   const preview = document.getElementById("preview");
   const video = document.getElementById("videoPreview");
@@ -2225,9 +2262,6 @@ function mostrarPreviewBackend(url, titulo = "") {
     "https://multi-web-uf1z.onrender.com",
     "https://taylorbundy.pythonanywhere.com",
   ];
-
-  let servidorActual = 0;
-  let intento = 0;
 
   video.pause();
 
@@ -2254,39 +2288,23 @@ function mostrarPreviewBackend(url, titulo = "") {
   preview.classList.remove("oculto");
 
   // Construir URL y probar el servidor correspondiente
-  function cargarPreview() {
-    if (servidorActual >= servidores.length) {
-      console.error("Todos los servidores fallaron.");
+  // function cargarPreview() {
+  //   if (servidorActual >= servidores.length) {
+  //     console.error("Todos los servidores fallaron.");
 
-      video.pause();
-      video.removeAttribute("src");
-      video.load();
+  //     video.pause();
+  //     video.removeAttribute("src");
+  //     video.load();
 
-      info.innerHTML += `
-        <p style="color: red;">
-          No se pudo cargar el preview.
-          Todos los servidores fallaron.
-        </p>
-      `;
+  //     info.innerHTML += `
+  //       <p style="color: red;">
+  //         No se pudo cargar el preview.
+  //         Todos los servidores fallaron.
+  //       </p>
+  //     `;
 
-      return;
-    }
-
-    const API = servidores[servidorActual];
-
-    const previewUrl = `${API}/previewNuevo?url=${encodeURIComponent(url)}&t=${Date.now()}`;
-
-    console.log(`Intento ${servidorActual + 1}:`, previewUrl);
-
-    intento = servidorActual;
-
-    video.pause();
-    video.removeAttribute("src");
-    video.load();
-
-    video.src = previewUrl;
-    video.load();
-  }
+  //     return;
+  //   }
 
   // Si falla la carga, intentar con el siguiente servidor
   video.onerror = function () {
@@ -2298,10 +2316,10 @@ function mostrarPreviewBackend(url, titulo = "") {
 
     servidorActual++;
 
-    cargarPreview();
+    cargarPreview(video, info, url);
   };
 
-  cargarPreview();
+  cargarPreview(video, info, url);
 }
 
 // function mostrarPreviewRedgifs2(url, titulo = "") {
