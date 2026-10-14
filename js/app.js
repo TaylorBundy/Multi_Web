@@ -1,9 +1,61 @@
 const loading = document.querySelector(".tenor-gif-embed");
-const API = "https://multi-web-uf1z.onrender.com";
+//const API = "https://multi-web-uf1z.onrender.com";
+//const API = "https://taylorbundy.pythonanywhere.com";
+let API;
 const nombreArchivo = document.querySelector("#nombre");
 let tamano = null;
 let directUrl;
 let sitio;
+let API_BASE = window.API_BASE || null;
+let ACTIVE_API_BASE = API_BASE;
+
+const SERVIDORES = [
+  "https://multi-web-uf1z.onrender.com",
+  "https://taylorbundy.pythonanywhere.com",
+];
+
+async function comprobarServidor(servidor) {
+  const controller = new AbortController();
+
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, 5000);
+
+  try {
+    const response = await fetch(`${servidor}/health`, {
+      signal: controller.signal,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.status !== "ok") {
+      throw new Error("Health check inválido");
+    }
+
+    return servidor;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function detectarServidor() {
+  if (window.API_BASE) {
+    API_BASE = window.API_BASE;
+    return API_BASE;
+  }
+
+  API_BASE = await Promise.any(SERVIDORES.map(comprobarServidor));
+
+  console.log("Servidor seleccionado:", API_BASE);
+
+  return API_BASE;
+}
+
 async function descargarVideo(url, nombre = "video.mp4") {
   console.log("URL:", url);
   // Modal
@@ -2140,6 +2192,8 @@ function mostrarPreviewBackend(url, titulo = "") {
 
   const backend = "https://TU-BACKEND.onrender.com";
 
+  console.log(API_BASE);
+
   const previewUrl = `${API}/previewNuevo?url=${encodeURIComponent(url)}`;
 
   console.log("Preview:", previewUrl);
@@ -2375,6 +2429,8 @@ function procesarBusqueda() {
   //}
   console.log(esVideoDirecto(url));
   (async () => {
+    await detectarServidor();
+    API = API_BASE;
     if (url.includes("twpornstars")) {
       //const ennnn = await obtenerMedia(url);
       //url = ennnn;

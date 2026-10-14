@@ -15,6 +15,16 @@ CORS(app)  # Permite que tu HTML se conecte desde otro origen si es necesario
 TEMP_DIR = os.path.join(os.getcwd(), "descargas_temp")
 os.makedirs(TEMP_DIR, exist_ok=True)
 
+@app.get("/health")
+def health():
+    return jsonify(
+        {
+            "status": "ok",
+            "service": "music-downloader",
+            "version": "1.0",
+            "server": "rifz",
+        }
+    )
 
 def agregar_metadatos_video2(
     archivo,
