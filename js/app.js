@@ -2129,7 +2129,7 @@ function mostrarPreview(url, tipo, info = "") {
   // =========================
 
   //videoInfo.textContent = info;
-  videoInfo.innerHTML = `<img src="${logo}" style="width: unset; border-radius: 10px; background-color: ${backgroundColor}; height: 40px; vertical-align: middle; margin: 0 5px 5px 0;"> ${tipo}`;
+  videoInfo.innerHTML = `<img src="${logo}" style="width: unset; border-radius: 10px; background-color: ${backgroundColor}; height: 40px; vertical-align: middle; margin: 0 5px 5px 0;"> ${info}`;
 }
 
 function mostrarPreview2(url, titulo = "") {
@@ -2471,10 +2471,16 @@ function procesarBusqueda() {
     logo =
       "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
     backgroundColor = `unset`;
+  } else if (url.includes("pbs.twimg.com")) {
+    logo =
+      "https://abs.twimg.com/responsive-web/client-web/icon-default.522d363a.png";
+    backgroundColor = `unset`;
+    sitio = "imagen";
   } else if (url.includes("manyvids")) {
     backgroundColor = `unset`;
   } else if (url.includes("kl.phncdn.com/pics/gifs")) {
     sitio = "imagen";
+    nombreFinal = url.split("/");
   } else if (url.includes("es.pornhub.com/view_video.php?viewkey")) {
     // window.open("https://downix.org", "_blank");
     // setTimeout(() => {
@@ -2571,7 +2577,7 @@ function procesarBusqueda() {
     // const datos = await fetch("/api/video?url=" + encodeURIComponent(url)).then(
     //   (r) => r.json(),
     // );
-    if (!esVideoDirecto(url)) {
+    if (!esVideoDirecto(url) && !url.includes("pbs.twimg.com")) {
       const respuesta2 = await fetch(`${API}/obtener-enlace`, {
         method: "POST",
         headers: {
@@ -2598,19 +2604,20 @@ function procesarBusqueda() {
         nombre = texto.split(".-.")[1];
         nombreFinal = nombre;
       }
-      if (sitio === "imagen") {
-        if (
-          url.includes("fapello.com") ||
-          url.includes("pbs.twimg.com") ||
-          url.includes("pornpics.com") ||
-          url.includes("kl.phncdn.com/pics/gifs")
-        ) {
-          nombre = obtenerNombreConExtension(url);
-          nombreFinal = nombre;
-          cambiarPreview("imagen", url);
-        }
+    }
+    if (sitio === "imagen") {
+      if (
+        url.includes("fapello.com") ||
+        url.includes("pbs.twimg.com") ||
+        url.includes("pornpics.com") ||
+        url.includes("kl.phncdn.com/pics/gifs")
+      ) {
+        nombre = obtenerNombreConExtension(url);
+        nombreFinal = nombre;
+        cambiarPreview("imagen", url);
       }
     }
+    //}
 
     // video.src = datos.formats[0].url;
     // const respuesta = await fetch(`${API}/buscar`, {
