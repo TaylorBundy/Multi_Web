@@ -1351,6 +1351,11 @@ async function descargarVideoConOpciones(url, nombre = "video.mp4") {
     btnCancelar.onclick = () => modal.remove();
 
     chunks.length = 0;
+    setTimeout(() => {
+      if (modal.isConnected) {
+        modal.remove();
+      }
+    }, 3000);
   } catch (error) {
     if (error.name === "AbortError" || cancelado) {
       console.log("Descarga cancelada");
