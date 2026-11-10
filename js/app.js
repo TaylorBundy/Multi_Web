@@ -2606,7 +2606,7 @@ function mostrarDescarga(url, nombre) {
   if (url.includes("porn4fans.com/get_file")) {
     //window.open(url, "_blank");
     //(async () => {
-    descargarVideoNuevo(url, nombre);
+    descargarVideoConOpciones(url, nombre);
     //})();
   }
   if (
@@ -2679,7 +2679,7 @@ function mostrarDescarga(url, nombre) {
           url.includes("downixcdn") ||
           url.includes("xgroovy")
         ) {
-          await descargarVideoNuevo(url, `${nombre}.mp4`);
+          await descargarVideoConOpciones(url, `${nombre}.mp4`);
         } else if (url.includes("xfree")) {
           await descargarVideoConOpciones(url, `${nombre}`);
         } else {
@@ -3056,6 +3056,7 @@ function mostrarPreviewX(url, titulo = "") {
   preview.classList.remove("oculto");
   conteVid.classList.remove("oculto");
 }
+
 function mostrarPreviewtte(url, titulo = "") {
   const preview = document.getElementById("preview");
   const video = document.getElementById("videoPreview");
@@ -3074,6 +3075,7 @@ function mostrarPreviewtte(url, titulo = "") {
 
   video.load();
 }
+
 function mostrarPreview(url, tipo, info = "") {
   const preview = document.getElementById("preview");
   const video = document.getElementById("videoPreview");
