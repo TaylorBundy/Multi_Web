@@ -1955,6 +1955,588 @@ async function descargarDesdeServidor(url, nombre = "video.mp4") {
   }
 }
 
+async function descargarDesdeServidorConOpciones(url, nombre = "video.mp4") {
+  // ==========================================
+  // CONTROL DE DESCARGA
+  // ==========================================
+
+  const controller = new AbortController();
+
+  let reader = null;
+  let pausado = false;
+  let cancelado = false;
+  let descargaFinalizada = false;
+  let resolverPausa = null;
+
+  // Esperar mientras la descarga esté pausada
+  function esperarReanudacion() {
+    if (!pausado) return Promise.resolve();
+
+    return new Promise((resolve) => {
+      resolverPausa = resolve;
+    });
+  }
+
+  function reanudar() {
+    pausado = false;
+
+    if (resolverPausa) {
+      resolverPausa();
+      resolverPausa = null;
+    }
+  }
+
+  // ==========================================
+  // MODAL
+  // ==========================================
+
+  const modal = document.createElement("div");
+
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    font-family: Arial, sans-serif;
+  `;
+
+  const contenido = document.createElement("div");
+
+  contenido.style.cssText = `
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 370px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,.3);
+    color: black;
+  `;
+
+  // ==========================================
+  // LOGO
+  // ==========================================
+
+  const imagenContainer = document.createElement("div");
+
+  imagenContainer.style.cssText = `
+    position: relative;
+    display: flex;
+    justify-content: center;
+    background-color: ${backgroundColor};
+    border-radius: 12px;
+    padding: 5px;
+  `;
+
+  const imagen = document.createElement("img");
+
+  if (url.includes("ssstwitter")) {
+    imagen.style.width = tamano;
+  }
+
+  if (url.includes("phncdn.com")) {
+    imagen.style.background = "#000";
+  }
+
+  imagen.src = logo;
+
+  if (typeof tamano !== "undefined" && tamano) {
+    imagen.style.height = tamano;
+  }
+
+  imagenContainer.appendChild(imagen);
+
+  // ==========================================
+  // TITULO
+  // ==========================================
+
+  const titulo = document.createElement("div");
+
+  titulo.style.cssText = `
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    word-break: break-word;
+  `;
+
+  titulo.textContent = `📥 Descargando: ${nombre}`;
+
+  // ==========================================
+  // PORCENTAJE
+  // ==========================================
+
+  const porcentajeTexto = document.createElement("div");
+
+  porcentajeTexto.style.cssText = `
+    font-size: 20px;
+    margin-bottom: 10px;
+  `;
+
+  porcentajeTexto.textContent = "Conectando...";
+
+  // ==========================================
+  // BARRA
+  // ==========================================
+
+  const barra = document.createElement("div");
+
+  barra.style.cssText = `
+    width: 100%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  `;
+
+  const progreso = document.createElement("div");
+
+  progreso.style.cssText = `
+    width: 0%;
+    height: 100%;
+    background: #4caf50;
+    transition: width .2s;
+  `;
+
+  barra.appendChild(progreso);
+
+  // ==========================================
+  // DETALLE / ETA
+  // ==========================================
+
+  const detalle = document.createElement("div");
+
+  detalle.style.cssText = `
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
+  `;
+
+  // ==========================================
+  // VELOCIDAD
+  // ==========================================
+
+  const velocidadTexto = document.createElement("div");
+
+  velocidadTexto.style.cssText = `
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+  `;
+
+  velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+  // ==========================================
+  // BOTONES
+  // ==========================================
+
+  const botones = document.createElement("div");
+
+  botones.style.cssText = `
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+  `;
+
+  const estiloBoton = `
+    border: none;
+    border-radius: 6px;
+    padding: 9px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+  `;
+
+  // Botón pausar
+  const btnPausa = document.createElement("button");
+
+  btnPausa.textContent = "⏸ Pausar";
+
+  btnPausa.style.cssText = `
+    ${estiloBoton}
+    background: #ff9800;
+    color: white;
+  `;
+
+  // Botón cancelar
+  const btnCancelar = document.createElement("button");
+
+  btnCancelar.textContent = "✖ Cancelar";
+
+  btnCancelar.style.cssText = `
+    ${estiloBoton}
+    background: #f44336;
+    color: white;
+  `;
+
+  botones.append(btnPausa, btnCancelar);
+
+  // ==========================================
+  // EVENTOS DE LOS BOTONES
+  // ==========================================
+
+  btnPausa.addEventListener("click", () => {
+    if (descargaFinalizada || cancelado) return;
+
+    if (!pausado) {
+      pausado = true;
+
+      btnPausa.textContent = "▶ Reanudar";
+
+      porcentajeTexto.textContent += " • Pausado";
+
+      velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+      detalle.textContent = "Descarga pausada";
+    } else {
+      reanudar();
+
+      btnPausa.textContent = "⏸ Pausar";
+
+      // El porcentaje se actualizará al recibir el próximo bloque.
+      porcentajeTexto.textContent = total
+        ? `${((descargado / total) * 100).toFixed(1)}%`
+        : "Descargando...";
+
+      detalle.textContent = total
+        ? `${(descargado / 1024 / 1024).toFixed(2)} MB / ${(total / 1024 / 1024).toFixed(2)} MB`
+        : "Descargando...";
+    }
+  });
+
+  btnCancelar.addEventListener("click", () => {
+    if (descargaFinalizada) {
+      modal.remove();
+      return;
+    }
+
+    if (cancelado) return;
+
+    cancelado = true;
+
+    // Liberar una posible espera por pausa
+    reanudar();
+
+    // Abortar la conexión con el servidor
+    controller.abort();
+
+    // Cancelar el lector si ya existe
+    if (reader) {
+      reader.cancel().catch(() => {});
+    }
+
+    porcentajeTexto.textContent = "Descarga cancelada";
+
+    detalle.textContent = "La descarga fue interrumpida.";
+
+    velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+    progreso.style.background = "#f44336";
+
+    btnPausa.remove();
+
+    btnCancelar.textContent = "Cerrar";
+
+    setTimeout(() => {
+      modal.remove();
+    }, 1200);
+  });
+
+  // ==========================================
+  // ARMAR MODAL
+  // ==========================================
+
+  contenido.append(
+    imagenContainer,
+    titulo,
+    porcentajeTexto,
+    barra,
+    detalle,
+    velocidadTexto,
+    botones,
+  );
+
+  modal.appendChild(contenido);
+
+  document.body.appendChild(modal);
+
+  // ==========================================
+  // VARIABLES DE DESCARGA
+  // ==========================================
+
+  let total = null;
+  let descargado = 0;
+
+  let ultimoTiempo = performance.now();
+  let ultimoDescargado = 0;
+
+  try {
+    // ==========================================
+    // SOLICITUD AL SERVIDOR
+    // ==========================================
+
+    const respuesta = await fetch(`${API}/descargar`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        url: url,
+      }),
+
+      signal: controller.signal,
+    });
+
+    console.log("Status:", respuesta.status);
+
+    if (!respuesta.ok) {
+      let mensaje = `Error ${respuesta.status}`;
+
+      try {
+        const datos = await respuesta.json();
+
+        if (datos.error) {
+          mensaje = datos.error;
+        }
+      } catch (_) {}
+
+      throw new Error(mensaje);
+    }
+
+    // ==========================================
+    // NOMBRE DEL ARCHIVO
+    // ==========================================
+
+    const contentDisposition = respuesta.headers.get("Content-Disposition");
+
+    let nombreArchivo = nombre;
+
+    if (contentDisposition && contentDisposition.includes("filename=")) {
+      nombreArchivo = contentDisposition
+        .split("filename=")[1]
+        .replace(/['"]/g, "");
+    }
+
+    titulo.textContent = `📥 Descargando: ${nombreArchivo}`;
+
+    // ==========================================
+    // TAMAÑO TOTAL
+    // ==========================================
+
+    const contentLength = respuesta.headers.get("content-length");
+
+    total = contentLength ? Number(contentLength) : null;
+
+    console.log("Content-Length:", contentLength);
+    console.log("Tamaño total:", total);
+
+    if (!total) {
+      porcentajeTexto.textContent = "Descargando...";
+
+      detalle.textContent = "No se puede calcular el progreso total.";
+    }
+
+    // ==========================================
+    // STREAM
+    // ==========================================
+
+    reader = respuesta.body.getReader();
+
+    const chunks = [];
+
+    // ==========================================
+    // LECTURA
+    // ==========================================
+
+    while (true) {
+      // Esperar si está pausado antes de leer
+      await esperarReanudacion();
+
+      if (cancelado) break;
+
+      const { done, value } = await reader.read();
+
+      if (done) break;
+
+      // Si se pausó mientras reader.read() estaba pendiente
+      await esperarReanudacion();
+
+      if (cancelado) break;
+
+      chunks.push(value);
+
+      descargado += value.length;
+
+      // ======================================
+      // VELOCIDAD
+      // ======================================
+
+      const ahora = performance.now();
+
+      const tiempo = (ahora - ultimoTiempo) / 1000;
+
+      if (tiempo >= 0.5) {
+        const bytesIntervalo = descargado - ultimoDescargado;
+
+        const velocidad = bytesIntervalo / tiempo;
+
+        let textoVelocidad;
+
+        if (velocidad >= 1024 * 1024) {
+          textoVelocidad = `${(velocidad / 1024 / 1024).toFixed(2)} MB/s`;
+        } else if (velocidad >= 1024) {
+          textoVelocidad = `${(velocidad / 1024).toFixed(2)} KB/s`;
+        } else {
+          textoVelocidad = `${velocidad.toFixed(0)} B/s`;
+        }
+
+        velocidadTexto.textContent = `Velocidad: ${textoVelocidad}`;
+
+        ultimoTiempo = ahora;
+
+        ultimoDescargado = descargado;
+
+        // ==================================
+        // ETA
+        // ==================================
+
+        if (total && velocidad > 0) {
+          const restante = total - descargado;
+
+          const segundos = restante / velocidad;
+
+          let eta;
+
+          if (segundos >= 3600) {
+            eta = `${Math.floor(segundos / 3600)}h ${Math.floor(
+              (segundos % 3600) / 60,
+            )}m`;
+          } else if (segundos >= 60) {
+            eta = `${Math.floor(segundos / 60)}m ${Math.floor(segundos % 60)}s`;
+          } else {
+            eta = `${Math.ceil(segundos)} s`;
+          }
+
+          detalle.textContent =
+            `${(descargado / 1024 / 1024).toFixed(2)} MB / ` +
+            `${(total / 1024 / 1024).toFixed(2)} MB • ETA: ${eta}`;
+        }
+      }
+
+      // ======================================
+      // PORCENTAJE
+      // ======================================
+
+      if (total) {
+        const porcentaje = ((descargado / total) * 100).toFixed(1);
+
+        porcentajeTexto.textContent = `${porcentaje}%`;
+
+        progreso.style.width = `${porcentaje}%`;
+      }
+    }
+
+    // ==========================================
+    // COMPROBAR CANCELACIÓN
+    // ==========================================
+
+    if (cancelado) return;
+
+    // ==========================================
+    // CREAR BLOB
+    // ==========================================
+
+    const blob = new Blob(chunks, {
+      type: "video/mp4",
+    });
+
+    const urlBlob = URL.createObjectURL(blob);
+
+    // ==========================================
+    // DESCARGA DEL NAVEGADOR
+    // ==========================================
+
+    const enlace = document.createElement("a");
+
+    enlace.href = urlBlob;
+
+    enlace.download = nombreArchivo;
+
+    document.body.appendChild(enlace);
+
+    enlace.click();
+
+    enlace.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(urlBlob);
+    }, 1000);
+
+    // ==========================================
+    // FINALIZADO
+    // ==========================================
+
+    descargaFinalizada = true;
+
+    porcentajeTexto.textContent = "100%";
+
+    progreso.style.width = "100%";
+
+    detalle.textContent = "Descarga completada";
+
+    velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+    btnPausa.remove();
+
+    btnCancelar.textContent = "Cerrar";
+
+    btnCancelar.style.background = "#4caf50";
+
+    // ==========================================
+    // CERRAR AUTOMÁTICAMENTE
+    // ==========================================
+
+    setTimeout(() => {
+      if (modal.isConnected) {
+        modal.remove();
+      }
+    }, 3000);
+  } catch (error) {
+    // ==========================================
+    // CANCELACIÓN
+    // ==========================================
+
+    if (cancelado || error.name === "AbortError") {
+      return;
+    }
+
+    // ==========================================
+    // ERROR
+    // ==========================================
+
+    console.error("Error descargando:", error);
+
+    porcentajeTexto.textContent = "Error en la descarga";
+
+    detalle.textContent = error.message;
+
+    progreso.style.background = "#f44336";
+
+    velocidadTexto.textContent = "";
+
+    btnPausa.remove();
+
+    btnCancelar.textContent = "Cerrar";
+
+    throw error;
+  }
+}
+
 function mostrarDescarga(url, nombre) {
   console.log(sitio);
   let linkkk;
@@ -2101,7 +2683,7 @@ function mostrarDescarga(url, nombre) {
         } else if (url.includes("xfree")) {
           await descargarVideoConOpciones(url, `${nombre}`);
         } else {
-          await descargarDesdeServidor(url, `${nombre}`);
+          await descargarDesdeServidorConOpciones(url, `${nombre}`);
         }
       }
       //}
