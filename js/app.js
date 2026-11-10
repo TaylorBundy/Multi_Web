@@ -3,6 +3,7 @@ const loading = document.querySelector(".tenor-gif-embed");
 //const API = "https://taylorbundy.pythonanywhere.com";
 let API;
 const nombreArchivo = document.querySelector("#nombre");
+const conteVid = document.querySelector(".conteVid");
 let tamano = null;
 let directUrl;
 let sitio;
@@ -1596,7 +1597,7 @@ function mostrarDescarga(url, nombre) {
   }
   mostrarResultado(`
         <div class="card">
-            <h2>${nombre}</h2>
+            <!-- <h2>${nombre}</h2> -->
 
             <button id="btnDescargar">
             <img id="btnImage" src="imagenes/descargar.avif" />
@@ -2054,6 +2055,7 @@ function mostrarPreviewX(url, titulo = "") {
   info.textContent = titulo;
 
   preview.classList.remove("oculto");
+  conteVid.classList.remove("oculto");
 }
 function mostrarPreviewtte(url, titulo = "") {
   const preview = document.getElementById("preview");
@@ -2069,6 +2071,7 @@ function mostrarPreviewtte(url, titulo = "") {
 
   info.textContent = titulo;
   preview.classList.remove("oculto");
+  conteVid.classList.remove("oculto");
 
   video.load();
 }
@@ -2078,6 +2081,7 @@ function mostrarPreview(url, tipo, info = "") {
   const videoInfo = document.getElementById("videoInfo");
 
   preview.classList.remove("oculto");
+  conteVid.classList.remove("oculto");
 
   // Limpiar preview anterior
   if (!sitio === "imagen") {
@@ -2150,6 +2154,7 @@ function mostrarPreview2(url, titulo = "") {
 
   // Mostrar preview
   preview.classList.remove("oculto");
+  conteVid.classList.remove("oculto");
 
   // Reproducir cuando esté listo
   // video.play().catch((error) => {
@@ -2170,6 +2175,7 @@ function mostrarPreviewNuevo(url, titulo = "") {
   info.textContent = titulo;
 
   preview.classList.remove("oculto");
+  conteVid.classList.remove("oculto");
 
   video.src = url;
   video.load();
@@ -2207,6 +2213,7 @@ function mostrarPreviewBackend2(url, titulo = "") {
   info.innerHTML = `<img src="${logo}" style="width: unset; border-radius: 10px; background-color: ${backgroundColor}; height: 40px; vertical-align: middle; margin: 0 5px 5px 0;"> ${titulo}`;
 
   preview.classList.remove("oculto");
+  conteVid.classList.remove("oculto");
 
   video.load();
 
@@ -2286,6 +2293,7 @@ function mostrarPreviewBackend(url, titulo = "") {
   `;
 
   preview.classList.remove("oculto");
+  conteVid.classList.remove("oculto");
 
   // Construir URL y probar el servidor correspondiente
   // function cargarPreview() {
@@ -2356,6 +2364,7 @@ function mostrarPreview44(url, titulo = "") {
   info.textContent = titulo;
 
   preview.classList.remove("oculto");
+  conteVid.classList.remove("oculto");
 
   video.load();
 
