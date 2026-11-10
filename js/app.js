@@ -956,6 +956,418 @@ async function descargarImagen2(url, nombre = "imagen") {
   }
 }
 
+async function descargarVideoConOpciones(url, nombre = "video.mp4") {
+  const controller = new AbortController();
+  let reader = null;
+  let pausado = false;
+  let cancelado = false;
+  let resolverPausa = null;
+
+  // Esperar hasta que se reanude
+  const esperarReanudacion = () => {
+    if (!pausado) return Promise.resolve();
+
+    return new Promise((resolve) => {
+      resolverPausa = resolve;
+    });
+  };
+
+  // Reanudar flujo
+  const reanudar = () => {
+    pausado = false;
+
+    if (resolverPausa) {
+      resolverPausa();
+      resolverPausa = null;
+    }
+  };
+
+  // =========================
+  // MODAL
+  // =========================
+
+  const modal = document.createElement("div");
+
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    font-family: Arial, sans-serif;
+  `;
+
+  const contenido = document.createElement("div");
+
+  contenido.style.cssText = `
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 370px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,.3);
+    color: black;
+  `;
+
+  const imagenContainer = document.createElement("div");
+
+  imagenContainer.style.cssText = `
+    position: relative;
+    display: flex;
+    justify-content: center;
+    background-color: ${backgroundColor};
+    border-radius: 12px;
+    padding: 5px;
+  `;
+
+  const imagen = document.createElement("img");
+  imagen.src = logo;
+
+  imagenContainer.appendChild(imagen);
+
+  const titulo = document.createElement("div");
+
+  titulo.style.cssText = `
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    word-break: break-word;
+  `;
+
+  titulo.textContent = `⬇ Descargando: ${nombre}`;
+
+  const porcentajeTexto = document.createElement("div");
+
+  porcentajeTexto.style.cssText = `
+    font-size: 20px;
+    margin-bottom: 10px;
+  `;
+
+  porcentajeTexto.textContent = "0%";
+
+  const barra = document.createElement("div");
+
+  barra.style.cssText = `
+    width: 100%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  `;
+
+  const progreso = document.createElement("div");
+
+  progreso.style.cssText = `
+    width: 0%;
+    height: 100%;
+    background: #4caf50;
+    transition: width .2s;
+  `;
+
+  barra.appendChild(progreso);
+
+  const detalle = document.createElement("div");
+
+  detalle.style.cssText = `
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
+  `;
+
+  const velocidadTexto = document.createElement("div");
+
+  velocidadTexto.style.cssText = `
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+  `;
+
+  velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+  // =========================
+  // BOTONES
+  // =========================
+
+  const botones = document.createElement("div");
+
+  botones.style.cssText = `
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
+  `;
+
+  const estiloBoton = `
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+  `;
+
+  const btnPausa = document.createElement("button");
+
+  btnPausa.textContent = "⏸ Pausar";
+
+  btnPausa.style.cssText = `
+    ${estiloBoton}
+    background: #ff9800;
+  `;
+
+  const btnCancelar = document.createElement("button");
+
+  btnCancelar.textContent = "✖ Cancelar";
+
+  btnCancelar.style.cssText = `
+    ${estiloBoton}
+    background: #e53935;
+  `;
+
+  botones.append(btnPausa, btnCancelar);
+
+  contenido.append(
+    imagenContainer,
+    titulo,
+    porcentajeTexto,
+    barra,
+    detalle,
+    velocidadTexto,
+    botones,
+  );
+
+  modal.appendChild(contenido);
+  document.body.appendChild(modal);
+
+  // =========================
+  // PAUSAR / REANUDAR
+  // =========================
+
+  btnPausa.onclick = () => {
+    if (cancelado) return;
+
+    if (!pausado) {
+      pausado = true;
+
+      btnPausa.textContent = "▶ Reanudar";
+
+      detalle.textContent = "Descarga pausada";
+
+      velocidadTexto.textContent = "Velocidad: 0 KB/s";
+    } else {
+      reanudar();
+
+      btnPausa.textContent = "⏸ Pausar";
+
+      detalle.textContent = "Reanudando descarga...";
+    }
+  };
+
+  // =========================
+  // CANCELAR
+  // =========================
+
+  btnCancelar.onclick = () => {
+    if (cancelado) return;
+
+    cancelado = true;
+
+    controller.abort();
+
+    reanudar();
+
+    btnPausa.disabled = true;
+    btnCancelar.disabled = true;
+
+    detalle.textContent = "Descarga cancelada";
+
+    velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+    porcentajeTexto.textContent = "Cancelado";
+
+    progreso.style.background = "#e53935";
+
+    if (reader) {
+      reader.cancel().catch(() => {});
+    }
+  };
+
+  // =========================
+  // DESCARGA
+  // =========================
+
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Error ${res.status}`);
+    }
+
+    const total = Number(res.headers.get("content-length"));
+
+    if (!total) {
+      porcentajeTexto.textContent = "Descargando...";
+      detalle.textContent = "No se puede calcular el progreso.";
+    }
+
+    reader = res.body.getReader();
+
+    const chunks = [];
+
+    let descargado = 0;
+
+    let ultimoTiempo = performance.now();
+    let ultimoDescargado = 0;
+
+    while (true) {
+      // Esperar si está pausado
+      await esperarReanudacion();
+
+      if (cancelado) break;
+
+      const { done, value } = await reader.read();
+
+      if (done) break;
+
+      // Si se pausó mientras esperaba datos,
+      // conservar el bloque y esperar para procesarlo.
+      await esperarReanudacion();
+
+      if (cancelado) break;
+
+      chunks.push(value);
+
+      descargado += value.length;
+
+      // =========================
+      // VELOCIDAD
+      // =========================
+
+      const ahora = performance.now();
+
+      const tiempo = (ahora - ultimoTiempo) / 1000;
+
+      if (tiempo >= 0.5) {
+        const bytesIntervalo = descargado - ultimoDescargado;
+
+        const velocidad = bytesIntervalo / tiempo;
+
+        let textoVelocidad;
+
+        if (velocidad >= 1024 * 1024) {
+          textoVelocidad = `${(velocidad / 1024 / 1024).toFixed(2)} MB/s`;
+        } else if (velocidad >= 1024) {
+          textoVelocidad = `${(velocidad / 1024).toFixed(2)} KB/s`;
+        } else {
+          textoVelocidad = `${velocidad.toFixed(0)} B/s`;
+        }
+
+        velocidadTexto.textContent = `Velocidad: ${textoVelocidad}`;
+
+        ultimoTiempo = ahora;
+        ultimoDescargado = descargado;
+
+        // ETA
+        if (total && velocidad > 0) {
+          const restante = total - descargado;
+
+          const segundos = restante / velocidad;
+
+          let eta;
+
+          if (segundos >= 3600) {
+            eta = `${Math.floor(segundos / 3600)}h ${Math.floor((segundos % 3600) / 60)}m`;
+          } else if (segundos >= 60) {
+            eta = `${Math.floor(segundos / 60)}m ${Math.floor(segundos % 60)}s`;
+          } else {
+            eta = `${Math.ceil(segundos)} s`;
+          }
+
+          detalle.textContent = `${(descargado / 1024 / 1024).toFixed(2)} MB / ${(total / 1024 / 1024).toFixed(2)} MB • ETA: ${eta}`;
+        }
+      }
+
+      // =========================
+      // PROGRESO
+      // =========================
+
+      if (total) {
+        const porcentaje = ((descargado / total) * 100).toFixed(1);
+
+        porcentajeTexto.textContent = `${porcentaje}%`;
+
+        progreso.style.width = `${porcentaje}%`;
+      }
+    }
+
+    // =========================
+    // FINALIZACIÓN
+    // =========================
+
+    if (cancelado) {
+      chunks.length = 0;
+
+      setTimeout(() => modal.remove(), 1000);
+
+      return;
+    }
+
+    const blob = new Blob(chunks);
+
+    const blobUrl = URL.createObjectURL(blob);
+
+    const enlace = document.createElement("a");
+
+    enlace.href = blobUrl;
+    enlace.download = nombre;
+
+    document.body.appendChild(enlace);
+
+    enlace.click();
+
+    enlace.remove();
+
+    // Liberar memoria después de iniciar la descarga
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
+
+    porcentajeTexto.textContent = "100%";
+
+    progreso.style.width = "100%";
+
+    detalle.textContent = "Descarga completada";
+
+    velocidadTexto.textContent = "Velocidad: 0 KB/s";
+
+    btnPausa.remove();
+    btnCancelar.textContent = "Cerrar";
+    btnCancelar.style.background = "#4caf50";
+    btnCancelar.onclick = () => modal.remove();
+
+    chunks.length = 0;
+  } catch (error) {
+    if (error.name === "AbortError" || cancelado) {
+      console.log("Descarga cancelada");
+
+      setTimeout(() => modal.remove(), 1000);
+
+      return;
+    }
+
+    console.error("Error en la descarga:", error);
+
+    modal.remove();
+
+    throw error;
+  }
+}
+
 async function descargarVideoNuevo(url, nombre = "video.mp4") {
   console.log("URL:", url);
   console.log("Nombre:", nombre);
@@ -1687,7 +2099,7 @@ function mostrarDescarga(url, nombre) {
         ) {
           await descargarVideoNuevo(url, `${nombre}.mp4`);
         } else if (url.includes("xfree")) {
-          await descargarVideoNuevo(url, `${nombre}`);
+          await descargarVideoConOpciones(url, `${nombre}`);
         } else {
           await descargarDesdeServidor(url, `${nombre}`);
         }
