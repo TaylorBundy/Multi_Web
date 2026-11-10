@@ -127,6 +127,7 @@ const DOMAINS = [
   "loyalfans.com",
   "redditp.com",
   "xdownloader.io",
+  "xfree.com",
 ];
 
 // // Reglas dinámicas para cada dominio
@@ -167,6 +168,8 @@ if (domain.includes("pornhub")) {
     "body > div.wrapper > div.container > div.nf-videos > div > div.gifsWrapper.hideLastItemLarge > ul > li.gifVideoBlock",
   );
   backgroundColor = `#000000ba`;
+} else if (domain.includes("xfree.com")) {
+  logo = "https://static.xfree.com/f2b4b6843c32192e0cc14c4a869c2020.svg";
 } else if (domain.includes("redgifs")) {
   //logo = document.querySelector("#root > div > div.topNav > a > img").src;
   logo = "https://www.redgifs.com/static/logo-full-red-C9X7m0yF.svg";

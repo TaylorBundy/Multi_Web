@@ -1558,6 +1558,8 @@ function mostrarDescarga(url, nombre) {
     //   nombreFinal = nombre;
     //   console.log(nombreFinal);
     // })();
+  } else if (url.includes("xfree.com")) {
+    logo = "https://static.xfree.com/f2b4b6843c32192e0cc14c4a869c2020.svg";
   } else if (url.includes("ods.manyvids.com")) {
     logo = "https://logos.manyvids.com/icon_public/favicon-32x32.png?v=4";
   } else if (url.includes("xgroovy") || url.includes("ahcdn")) {
@@ -1616,6 +1618,7 @@ function mostrarDescarga(url, nombre) {
   if (
     //url.includes("media.redgifs.com") ||
     url.includes("kl.phncdn.com") ||
+    url.includes("cdn.xfree.com") ||
     url.includes("ssstwitter")
   ) {
     console.log("jaja");
@@ -1683,6 +1686,8 @@ function mostrarDescarga(url, nombre) {
           url.includes("xgroovy")
         ) {
           await descargarVideoNuevo(url, `${nombre}.mp4`);
+        } else if (url.includes("xfree")) {
+          await descargarVideoNuevo(url, `${nombre}`);
         } else {
           await descargarDesdeServidor(url, `${nombre}`);
         }
