@@ -2563,6 +2563,8 @@ function mostrarDescarga(url, nombre) {
     logo = "https://logos.manyvids.com/icon_public/favicon-32x32.png?v=4";
   } else if (url.includes("xgroovy") || url.includes("ahcdn")) {
     logo = "https://es.xgroovy.com/favicon.ico";
+  } else if (url.includes("sx.cdn.live")) {
+    logo = "https://staticp2.sxccdn.com/static/media/favicon.svg?v=1743638400000";
   } else if (url.includes("xxxi") || url.includes("viidoos")) {
     logo = "https://es.xxxi.porn/static/images/xxxi.png";
   } else if (
@@ -2646,6 +2648,9 @@ function mostrarDescarga(url, nombre) {
     //mostrarPreview2(url, nombre);
     mostrarPreview2(url, nombre);
   } else {
+    if (url.includes("sx.cdn.live")) {
+      mostrarPreview(url, sitio, nombre);
+    }
     if (sitio === "imagen") {
       mostrarPreview(url, sitio, nombre);
     } else {
@@ -3493,6 +3498,9 @@ function procesarBusqueda() {
     sitio = "imagen";
   } else if (url.includes("manyvids")) {
     backgroundColor = `unset`;
+  } else if (url.includes("sx.cdn.live")) {
+    sitio = "imagen";
+    nombreFinal = nombreArchivo.value;
   } else if (url.includes("kl.phncdn.com/pics/gifs")) {
     sitio = "imagen";
     nombreFinal = url.split("/");
@@ -3621,6 +3629,10 @@ function procesarBusqueda() {
       }
     }
     if (sitio === "imagen") {
+      if (url.includes("sx.cdn.live")) {
+        nombreFinal = nombreArchivo.value;
+        cambiarPreview("imagen", url);
+      }
       if (
         url.includes("fapello.com") ||
         url.includes("pbs.twimg.com") ||
@@ -3650,8 +3662,13 @@ function procesarBusqueda() {
       nombreFinal = nombreArchivo.value;
     }
     console.log("Nombre final:", nombreFinal);
+    if (sitio === "imagen") {
+      mostrarDescarga(`${url}`, `${nombreFinal}.jpg`);
+    } else {
+      mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
+    }
 
-    mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
+    //mostrarDescarga(`${url}`, `${nombreFinal}.mp4`);
   })();
 
   function cambiarPreview(tipo, url) {

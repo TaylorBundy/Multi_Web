@@ -128,6 +128,8 @@ const DOMAINS = [
   "redditp.com",
   "xdownloader.io",
   "xfree.com",
+  "sex.com",
+  "sx.cdn.live",
 ];
 
 // // Reglas dinámicas para cada dominio
@@ -170,6 +172,8 @@ if (domain.includes("pornhub")) {
   backgroundColor = `#000000ba`;
 } else if (domain.includes("xfree.com")) {
   logo = "https://static.xfree.com/f2b4b6843c32192e0cc14c4a869c2020.svg";
+} else if (domain.includes("sx.cdn.live")) {
+  logo = "https://staticp2.sxccdn.com/static/media/favicon.svg?v=1743638400000";
 } else if (domain.includes("redgifs")) {
   //logo = document.querySelector("#root > div > div.topNav > a > img").src;
   logo = "https://www.redgifs.com/static/logo-full-red-C9X7m0yF.svg";
